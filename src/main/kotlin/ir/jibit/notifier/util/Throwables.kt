@@ -10,8 +10,6 @@ private const val EMPTY_STACKTRACE = ""
  * Converts the given `throwable` to its corresponding full stacktrace.
  *
  * @return The full stacktrace for the given exception.
- *
- * @author Ali Dehghani
  */
 fun Throwable?.stackTrace(): String {
     if (this == null) return EMPTY_STACKTRACE

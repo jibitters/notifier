@@ -1,0 +1,3 @@
+nats:
+  servers:
+    - nats://localhost:4222
