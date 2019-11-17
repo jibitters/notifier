@@ -1,5 +1,7 @@
 package ir.jibit.notifier.provider
 
+import ir.jibit.notifier.util.stackTrace
+
 /**
  * Abstract superclass for all notification request types.
  */
@@ -27,7 +29,7 @@ class FailedNotification(val exception: Throwable? = null) : NotificationRespons
      * A human friendly representation of a [FailedNotification].
      */
     override fun toString(): String {
-        return "Failed: ${exception?.stackTrace ?: "No Stacktrace"}"
+        return "Failed: ${exception?.stackTrace() ?: "No Stacktrace"}"
     }
 }
 
@@ -35,7 +37,7 @@ class FailedNotification(val exception: Throwable? = null) : NotificationRespons
  * Encapsulates all necessary information about the successful notification. The client can optionally
  * use [log] to store more logs about the response.
  */
-class SuccessfulNotification(val log: String? = null) {
+class SuccessfulNotification(val log: String? = null) : NotificationResponse() {
 
     /**
      * A human friendly representation of a [SuccessfulNotification].

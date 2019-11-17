@@ -1,0 +1,9 @@
+ok-http:
+  call-timeout: 61 # In Seconds
+  connect-timeout: 61 # In Seconds
+  read-timeout: 61 # In Seconds
+
+kavehnegar:
+  sender: 1000660
+  base-url: https://api.kavenegar.com/
+  token: fake-token

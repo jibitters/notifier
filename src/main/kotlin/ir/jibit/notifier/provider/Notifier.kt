@@ -16,5 +16,5 @@ interface Notifier {
      * Performs the actual mechanics of notification processing. This implementation must not throw any
      * exceptions and communicate the function result through an appropriate implementation of [NotificationResponse].
      */
-    fun notify(notification: Notification): NotificationResponse
+    suspend fun notify(notification: Notification): NotificationResponse
 }
