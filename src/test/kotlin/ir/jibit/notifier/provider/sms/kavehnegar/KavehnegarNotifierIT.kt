@@ -174,7 +174,11 @@ class KavehnegarNotifierIT {
 
         @Bean
         fun kavehnegarNotifier(kavehnegarClient: KavehnegarClient, kavehnegarProperties: KavehnegarProperties): KavehnegarNotifier =
-            KavehnegarNotifier(kavehnegarClient, kavehnegarProperties.also { it.baseUrl = wireMockServer.baseUrl() })
+            KavehnegarNotifier(kavehnegarClient, kavehnegarProperties.also {
+                it.baseUrl = wireMockServer.baseUrl()
+                it.token = "fake-token"
+                it.sender = "10002002200220"
+            })
     }
 
     companion object {
