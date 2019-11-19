@@ -29,6 +29,7 @@
         <maven-failsafe-plugin.version>2.22.1</maven-failsafe-plugin.version>
         <test-containers.version>1.10.5</test-containers.version>
         <retrofit.version>2.6.2</retrofit.version>
+        <wiremock.version>2.21.0</wiremock.version>
     </properties>
 
     <dependencies>
@@ -73,7 +74,7 @@
         </dependency>
         <dependency>
             <groupId>com.squareup.retrofit2</groupId>
-            <artifactId>converter-jackson</artifactId>
+            <artifactId>converter-scalars</artifactId>
             <version>${retrofit.version}</version>
         </dependency>
 
@@ -114,7 +115,7 @@
         <dependency>
             <groupId>com.github.tomakehurst</groupId>
             <artifactId>wiremock-jre8-standalone</artifactId>
-            <version>2.21.0</version>
+            <version>${wiremock.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

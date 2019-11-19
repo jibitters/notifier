@@ -9,6 +9,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.stereotype.Service
 import retrofit2.Response
 import retrofit2.Retrofit
+import retrofit2.converter.scalars.ScalarsConverterFactory
 import java.io.IOException
 
 /**
@@ -29,6 +30,7 @@ class KavehnegarNotifier(private val properties: KavehnegarProperties,
      */
     private val client = Retrofit.Builder()
         .client(okHttpClient)
+        .addConverterFactory(ScalarsConverterFactory.create())
         .baseUrl(properties.baseUrl!!)
         .build()
         .create(KavehnegarClient::class.java)
@@ -47,7 +49,7 @@ class KavehnegarNotifier(private val properties: KavehnegarProperties,
             val response = when (notification) {
                 is CallNotification -> makeCall(notification)
                 is SmsNotification -> sendSms(notification)
-                else -> return FailedNotification(log = "The ${notification::class.simpleName} not supported")
+                else -> return FailedNotification(log = "The ${notification::class.simpleName} is not supported")
             }
 
             val errorBody = response.errorBody()?.string()
@@ -77,6 +79,6 @@ class KavehnegarNotifier(private val properties: KavehnegarProperties,
         notification as SmsNotification
         val receptors = notification.recipients.joinToString()
 
-        return client.sendSms(properties.token!!, receptors, notification.message, properties.sender)
+        return client.sendSms(properties.token!!, receptors, notification.message, properties.sender!!)
     }
 }

@@ -29,5 +29,5 @@ data class KavehnegarProperties(
      * With that number we send SMS to user.
      */
     @field:NotBlank(message = "The Kavehnegar sender is required (sms-providers.kavehnegar.sender)")
-    val sender: String
+    val sender: String? = null
 )
