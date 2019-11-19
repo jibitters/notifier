@@ -1,14 +1,10 @@
 package ir.jibit.notifier.provider.sms
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import ir.jibit.notifier.provider.Notification
 
 /**
  * Encapsulates the details for a SMS notification request.
- *
- * @author Younes Rahimi
  */
-@JsonIgnoreProperties(ignoreUnknown = true)
 data class SmsNotification(
 
     /**

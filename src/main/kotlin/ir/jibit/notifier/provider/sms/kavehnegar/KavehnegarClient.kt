@@ -7,8 +7,6 @@ import retrofit2.http.Query
 
 /**
  * A Retrofit client responsible for abstracting the network call to Kavehnegar SMS and call API.
- *
- * @author Younes Rahimi
  */
 interface KavehnegarClient {
 
@@ -24,7 +22,7 @@ interface KavehnegarClient {
     suspend fun sendSms(@Path("api-token") token: String,
                         @Query("receptor") receptors: String?,
                         @Query("message") message: String,
-                        @Query("sender") sender: String): Response<KavehnegarResponse>
+                        @Query("sender") sender: String): Response<String>
 
     /**
      * Make voice call.
@@ -36,5 +34,5 @@ interface KavehnegarClient {
     @POST("/v1/{api-token}/call/maketts.json")
     suspend fun makeCall(@Path("api-token") token: String,
                          @Query("receptor") receptors: String?,
-                         @Query("message") message: String): Response<KavehnegarResponse>
+                         @Query("message") message: String): Response<String>
 }
