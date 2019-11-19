@@ -1,3 +1,8 @@
 nats:
   servers:
     - nats://localhost:4222
+sms-providers:
+  use: kavehnegar
+  kavehnegar:
+    token: token
+    sender: sender
