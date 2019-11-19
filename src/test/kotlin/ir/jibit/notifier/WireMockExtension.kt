@@ -25,7 +25,7 @@ class WireMockExtension : BeforeAllCallback, AfterAllCallback {
         log.info("WireMock is listening on $port")
     }
 
-    override fun afterAll(p0: ExtensionContext?) {
+    override fun afterAll(ctx: ExtensionContext?) {
         server?.stop()
         System.clearProperty("TEST_WIREMOCK_PORT")
         log.info("WireMock has stopped successfully")
