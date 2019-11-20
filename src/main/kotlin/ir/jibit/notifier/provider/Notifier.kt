@@ -17,5 +17,5 @@ interface Notifier {
      * exceptions and communicate the function result through an appropriate implementation of
      * [NotificationResponse].
      */
-    suspend fun notify(notification: Notification): NotificationResponse
+    fun notify(notification: Notification): NotificationResponse
 }
