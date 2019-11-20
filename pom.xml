@@ -30,6 +30,8 @@
         <test-containers.version>1.10.5</test-containers.version>
         <retrofit.version>2.6.2</retrofit.version>
         <wiremock.version>2.21.0</wiremock.version>
+        <protobuf.version>3.10.0</protobuf.version>
+        <protobuf-maven-plugin.version>0.6.1</protobuf-maven-plugin.version>
     </properties>
 
     <dependencies>
@@ -76,6 +78,11 @@
             <groupId>com.squareup.retrofit2</groupId>
             <artifactId>converter-scalars</artifactId>
             <version>${retrofit.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+            <version>${protobuf.version}</version>
         </dependency>
 
         <!-- Test & Optional Dependencies -->
@@ -125,6 +132,24 @@
         <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
 
         <plugins>
+            <!-- Protocol Buffer Plugin -->
+            <plugin>
+                <groupId>org.xolstice.maven.plugins</groupId>
+                <artifactId>protobuf-maven-plugin</artifactId>
+                <version>${protobuf-maven-plugin.version}</version>
+                <configuration>
+                    <protocExecutable>protoc</protocExecutable>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compile</goal>
+                            <goal>test-compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
             <!-- Spring Boot Plugin -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
