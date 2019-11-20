@@ -1,6 +1,9 @@
 logging:
   level:
     root: info
+nats:
+  servers:
+    - nats://localhost:${TEST_NATS_PORT:4222}
 sms-providers:
   use: kavehnegar
   kavehnegar:
