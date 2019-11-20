@@ -44,7 +44,7 @@ class KavehnegarNotifier(private val properties: KavehnegarProperties,
     /**
      * Builds the HTTP request and sends it to Kavehnegar
      */
-    override suspend fun notify(notification: Notification): NotificationResponse {
+    override fun notify(notification: Notification): NotificationResponse {
         try {
             val response = when (notification) {
                 is CallNotification -> makeCall(notification)
@@ -65,20 +65,20 @@ class KavehnegarNotifier(private val properties: KavehnegarProperties,
     /**
      * Responsible to call the make call API.
      */
-    private suspend fun makeCall(notification: Notification): Response<String> {
+    private fun makeCall(notification: Notification): Response<String> {
         notification as CallNotification
         val receptors = notification.recipients.joinToString()
 
-        return client.makeCall(properties.token!!, receptors, notification.message)
+        return client.makeCall(properties.token!!, receptors, notification.message).execute()
     }
 
     /**
      * Responsible to call the send sms API.
      */
-    private suspend fun sendSms(notification: Notification): Response<String> {
+    private fun sendSms(notification: Notification): Response<String> {
         notification as SmsNotification
         val receptors = notification.recipients.joinToString()
 
-        return client.sendSms(properties.token!!, receptors, notification.message, properties.sender!!)
+        return client.sendSms(properties.token!!, receptors, notification.message, properties.sender!!).execute()
     }
 }
