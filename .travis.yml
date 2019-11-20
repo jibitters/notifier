@@ -1,0 +1,9 @@
+language: java
+matrix:
+  include:
+    - jdk: openjdk8
+      os:  linux
+install: true
+script:
+  - ./mvnw clean verify -B
+  - bash <(curl -s https://codecov.io/bash)
