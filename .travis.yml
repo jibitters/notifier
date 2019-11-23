@@ -14,9 +14,6 @@ matrix:
     - jdk: openjdk8
       os:  linux
 install: true
-before_script:
-  - docker run -d -p 4222:4222 nats:2.1.0-scratch
-  - docker ps -a
 script:
   - ./mvnw clean verify sonar:sonar -Dsonar.projectKey=jibitters_notifier -B
   - bash <(curl -s https://codecov.io/bash)

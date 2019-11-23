@@ -27,7 +27,6 @@ import org.springframework.context.annotation.ComponentScan
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import java.time.Duration
 
 /**
  * Integration tests for notification dispatching subsystem.
@@ -62,7 +61,6 @@ internal class NotificationDispatcherIT {
             on { smsProvider.canNotify(any<SmsNotification>())} doReturn true
             on { callProvider.canNotify(any<CallNotification>())} doReturn true
         }
-        connection.flush(Duration.ofSeconds(1))
     }
 
     @Test
