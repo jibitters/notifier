@@ -38,6 +38,7 @@ class NotificationDispatcher(@Autowired(required = false) private val notifiers:
      * Simply submits the incoming request to the executor and returns immediately.
      */
     fun dispatch(message: ByteArray) {
+        log.info("Received a new message!")
         ioExecutor.execute { message.process() }
     }
 
