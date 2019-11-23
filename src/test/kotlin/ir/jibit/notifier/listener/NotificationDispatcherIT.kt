@@ -120,7 +120,7 @@ internal class NotificationDispatcherIT {
     }
 
     private fun waitForConsumerToCatchUp() {
-        Thread.sleep(3000)
+        Thread.sleep(10000)
     }
 
     @TestConfiguration
