@@ -23,7 +23,7 @@ data class KavehnegarProperties(
      * The Kavehnegar base URL which by default is https://api.kavenegar.com/.
      */
     @field:NotBlank(message = "The Kavehnegar Base URL is required (sms-providers.kavehnegar.base-url)")
-    val baseUrl: String? = "https://api.kavenegar.com/",
+    val baseUrl: String? = "http://api.kavenegar.com/",
 
     /**
      * With that number we send SMS to user.
