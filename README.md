@@ -19,8 +19,7 @@ The main components of the Notifier are as following:
  - Protocol Buffer Compiler: All published messages should be serialized with [Protobuf](https://developers.google.com/protocol-buffers).
 
 #### Building from Source
-Notifier is typical maven based project, so you can simply use the bundled maven wrapper to build the application. In order
-to do so:
+Notifier is a typical maven based project, so you can simply use the bundled maven wrapper to build the application. In order to do so:
  - First make sure you've installed a decent JVM version.
  - Install the Protobuf compiler.
  - If you're planning to run it, you would need a Nats instance, too.
@@ -32,8 +31,8 @@ Then run the following command:
 This will generate a Jar package in the `target` directory.
 
 #### Running the Application
-Before running the Notifier, we should have an up and running instance of Nate somewhere. Also, `nats.servers` configuration
-property represents the address for that Nats server. 
+Before running the Notifier, we should have an up and running instance of Nats somewhere. Also, `nats.servers` configuration
+property represents the address of that Nats server. 
 
 For example, if our Nats server is listening to port `4222` of localhost, then we can launch the Notifier with something
 like:
@@ -46,7 +45,7 @@ In order to publish notification requests to the Notifier, we should generate th
 specifications residing the [`src/main/proto`](src/main/proto) directory. 
 For example, here's how we can create a notification request in Kotlin:
 ```kotlin
-val request = newBuilder()
+val request = NotificationRequest.newBuilder()
         .setType(SMS)
         .setMessage("Hello from Notifier")
         .addRecipients("09124242424")
@@ -66,7 +65,13 @@ TODO
 
 Architecture
 -------------
-TODO
+Here's the bird's-eye view of the Notifier:
+![architecture copy](https://user-images.githubusercontent.com/696139/69484480-ed4e7e80-0e48-11ea-8226-69bb01f668ee.png)
+
+As you can spot from the picture, each incoming notification request would have the following lifecycle:
+ - Getting published into a **Nats Topic**. Different Topics have different consumers and consequently, different processing logic.
+ - Being picked up by a **Notification Listener**. Notification listeners are using a dedicated thread-pool to receive the requests and route them to appropriate notification handlers.
+ - Being processed by a dedicated **Notification Handler**. Each handler can process a particular type of notification, e.g. SMS, and can be scaled independently of other handlers. Handlers are backed by another thread-pool well-suited for IO operations.
 
 Notification Providers
 ----------------------
