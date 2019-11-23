@@ -4,6 +4,7 @@ logging:
 nats:
   servers:
     - nats://localhost:${TEST_NATS_PORT:4222}
+  pool-size: 1
 sms-providers:
   use: kavehnegar
   kavehnegar:

@@ -32,7 +32,7 @@ class NotificationDispatcher(@Autowired(required = false) private val notifiers:
     /**
      * An executor service responsible for executing actual IO operations.
      */
-    private val ioExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2)
+    private val ioExecutor = Executors.newFixedThreadPool(1)
 
     /**
      * Simply submits the incoming request to the executor and returns immediately.
