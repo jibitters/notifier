@@ -33,6 +33,7 @@ class NatsExtension : BeforeAllCallback, AfterAllCallback {
         container.waitingFor(LogMessageWaitStrategy().withRegEx(".*Server is ready.*"))
         container.start()
         System.setProperty("TEST_NATS_PORT", "${container.firstMappedPort}")
+        Runtime.getRuntime().exec("docker ps -a")
         log.info("The Nats has been started and is listening to ${container.firstMappedPort}")
     }
 
