@@ -6,3 +6,4 @@ sms-providers:
   kavehnegar:
     token: token
     sender: sender
+    base-url: http://api.kavenegar.com/
