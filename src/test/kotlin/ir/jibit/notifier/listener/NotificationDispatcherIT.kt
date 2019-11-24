@@ -18,7 +18,6 @@ import ir.jibit.notifier.stubs.Notification.NotificationRequest.Type.SMS
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.ConfigFileApplicationContextInitializer
@@ -35,7 +34,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @ActiveProfiles("test")
 @MockBean(MeterRegistry::class)
 @ExtendWith(SpringExtension::class, NatsExtension::class)
-@DisabledIfEnvironmentVariable(named = "CI", matches = "true")
 @ContextConfiguration(initializers = [ConfigFileApplicationContextInitializer::class])
 internal class NotificationDispatcherIT {
 
