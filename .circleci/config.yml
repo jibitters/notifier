@@ -12,11 +12,5 @@ jobs:
       - run: curl -L https://github.com/protocolbuffers/protobuf/releases/download/v3.6.1/protoc-3.6.1-linux-x86_64.zip -o protoc.zip
       - run: unzip protoc.zip
       - run: export PATH=$PATH:./bin
-      - run: ./mvnw clean verify sonar:sonar -Dsonar.projectKey=jibitters_notifier -Dsonar.organization=jibitters -Donar.host.url="https://sonarcloud.io" -B
+      - run: ./mvnw clean verify -B
       - run: bash <(curl -s https://codecov.io/bash)
-
-workflows:
-  main:
-    jobs:
-      - build:
-          context: SonarCloud
