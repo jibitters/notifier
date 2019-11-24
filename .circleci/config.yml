@@ -3,6 +3,7 @@ jobs:
   build:
     docker:
       - image: circleci/openjdk:8-jdk
+      - image: nats:2.1.0-scratch
     working_directory: ~/repo
     environment:
       MAVEN_OPTS: -Xmx3200m
