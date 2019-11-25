@@ -1,8 +1,8 @@
 <h1 align="center">Notifier</h1> 
 
-[![Build Status](https://travis-ci.org/jibitters/notifier.svg?branch=master)](https://travis-ci.org/jibitters/notifier) 
-[![codecov](https://codecov.io/gh/jibitters/notifier/branch/master/graph/badge.svg)](https://codecov.io/gh/jibitters/notifier)
+[![CircleCI](https://circleci.com/gh/jibitters/notifier.svg?style=svg)](https://circleci.com/gh/jibitters/notifier)
 [![Sonar Quality Gate](https://img.shields.io/sonar/quality_gate/jibitters_notifier?label=code%20quality&server=https%3A%2F%2Fsonarcloud.io)](https://sonarcloud.io/dashboard?id=jibitters_notifier)
+[![Sonar Code Cov](https://img.shields.io/sonar/coverage/jibitters_notifier?label=coverage&server=https%3A%2F%2Fsonarcloud.io)](https://sonarcloud.io/dashboard?id=jibitters_notifier)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![made-with-kotlin](https://img.shields.io/badge/Made%20with-Kotlin-ed55e3.svg)](https://kotlinlang.org)
 
