@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull
  */
 @ConstructorBinding
 @ConfigurationProperties(prefix = "http")
-data class HttpProperties(
+class HttpProperties(
 
     /**
      * Represents the HTTP call timeout in seconds.

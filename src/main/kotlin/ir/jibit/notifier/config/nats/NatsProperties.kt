@@ -12,7 +12,7 @@ import javax.validation.constraints.NotNull
 @Validated
 @ConstructorBinding
 @ConfigurationProperties(prefix = "nats")
-data class NatsProperties(
+class NatsProperties(
 
     /**
      * Collection of Nats services to connect with.

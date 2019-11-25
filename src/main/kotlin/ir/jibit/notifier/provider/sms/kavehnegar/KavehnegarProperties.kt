@@ -11,7 +11,7 @@ import javax.validation.constraints.NotBlank
 @Validated
 @ConstructorBinding
 @ConfigurationProperties(prefix = "sms-providers.kavehnegar")
-data class KavehnegarProperties(
+class KavehnegarProperties(
 
     /**
      * Represents Kavehnegar token to authorized us for use Kavehnegar API.
