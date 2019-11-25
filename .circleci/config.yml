@@ -12,12 +12,8 @@ jobs:
       - run: sudo apt-get update && sudo apt-get -y install autoconf automake libtool curl make g++ unzip
       - run: curl -L https://github.com/protocolbuffers/protobuf/releases/download/v3.6.1/protoc-3.6.1-linux-x86_64.zip -o protoc.zip
       - run: unzip protoc.zip && sudo cp ./bin/protoc /usr/bin/protoc
-      - run: ./mvnw clean verify -B
-      - sonarcloud/scan
+      - run: ./mvnw clean verify -Dsonar.projectKey=jibitters_java-notifier -Dsonar.organization=jibitters -Dsonar.host.url=https://sonarcloud.io -B
       - run: bash <(curl -s https://codecov.io/bash)
-
-orbs:
-  sonarcloud: sonarsource/sonarcloud@1.0.1
 
 workflows:
   main:
