@@ -5,7 +5,7 @@ import ir.jibit.notifier.provider.Notification
 /**
  * Encapsulates the details for a SMS notification request.
  */
-data class SmsNotification(
+class SmsNotification(
 
     /**
      * The message to send.
