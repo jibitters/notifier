@@ -1,2 +1,2 @@
 ignore:
-  - "ir/jibit/notifier/stubs/*"
+  - "ir/jibit/notifier/stubs/**"
