@@ -7,6 +7,8 @@ import javax.validation.constraints.NotNull
 
 /**
  * Encapsulates the HTTP client configurations.
+ *
+ * @author Ali Dehghani
  */
 @ConstructorBinding
 @ConfigurationProperties(prefix = "http")

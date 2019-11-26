@@ -4,6 +4,8 @@ import ir.jibit.notifier.provider.Notification
 
 /**
  * Encapsulates the details for a Call notification request.
+ *
+ * @author Ali Dehghani
  */
 class CallNotification(
 

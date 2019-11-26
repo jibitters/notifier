@@ -29,6 +29,8 @@ import java.util.stream.Stream
 
 /**
  * Integration tests for Kavehnegar notifier.
+ *
+ * @author Ali Dehghani
  */
 @ActiveProfiles("test")
 @ExtendWith(SpringExtension::class, WireMockExtension::class)

@@ -19,6 +19,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 
 /**
  * Integration tests for Kavehnegar notifier and application context.
+ *
+ * @author Ali Dehghani
  */
 @ActiveProfiles("test")
 @ExtendWith(SpringExtension::class)

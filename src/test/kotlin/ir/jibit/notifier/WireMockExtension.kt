@@ -10,6 +10,8 @@ import org.junit.jupiter.api.extension.ExtensionContext
 /**
  * A JUnit 5 extension to setting up a WireMock server before all tests and
  * tearing it down after all of them.
+ *
+ * @author Ali Dehghani
  */
 class WireMockExtension : BeforeAllCallback, AfterAllCallback {
 

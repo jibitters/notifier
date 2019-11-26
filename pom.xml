@@ -213,7 +213,8 @@
                 <version>${jacoco.version}</version>
                 <configuration>
                     <excludes>
-                        <exclude>**/ir/jibit/notifier/stubs/**/*</exclude>
+                        <exclude>ir/jibit/notifier/stubs/**/*</exclude>
+                        <exclude>ir/jibit/notifier/Application*</exclude>
                     </excludes>
                 </configuration>
                 <executions>
