@@ -18,7 +18,7 @@ import java.util.concurrent.Executors
  * requests and dispatches them to appropriate [Notifier] implementations.
  *
  * @param notifiers Collection of all [Notifier] implementations that are registered as Spring beans.
- * @param meterRegistry To register metrics.o
+ * @param meterRegistry To register metrics.
  *
  * @author Ali Dehghani
  */
