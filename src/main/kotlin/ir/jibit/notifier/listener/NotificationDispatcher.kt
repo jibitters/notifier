@@ -45,38 +45,72 @@ class NotificationDispatcher(@Autowired(required = false) private val notifiers:
         ioExecutor.execute { message.process() }
     }
 
+    /**
+     * Parses the receiving byte array into a [Notification], finds the right implementation of
+     * [Notifier] for notification processing and delegates the notification processing task to
+     * the that [Notifier].
+     *
+     * All these operations can terminate successfully or exceptionally. Both situations are going
+     * to be recorded as Micrometer metrics.
+     */
     private fun ByteArray.process() {
         val sample = Timer.start(meterRegistry)
         try {
-            val parsed = NotificationRequest.parseFrom(this)
-            val notification = parsed.toNotification()
-            if (notification == null) {
-                sample.stop(handledMetric("failed", "InvalidNotificationType"))
-                log.warn("Invalid notification type: {}", parsed.toString())
-                return
-            }
-
-            val notifier = notifiers?.firstOrNull { it.canNotify(notification) }
-            if (notifier == null) {
-                sample.stop(handledMetric("failed", "NoNotificationHandler"))
-                log.warn("Couldn't find a notifier capable of handling this particular notification: {}", notification)
-                return
-            }
-
-            when (val response = notifier.notify(notification)) {
-                is SuccessfulNotification -> {
-                    sample.stop(handledMetric())
-                    log.debug("Successfully handled a notification: {}", response)
-                }
-                is FailedNotification -> {
-                    val reason = response.exception?.javaClass?.simpleName ?: "Unknown"
-                    sample.stop(handledMetric("failed", reason))
-                    log.warn("Failed to deliver a notification: {}", response)
-                }
-            }
+            val notification = parseNotification(sample) ?: return
+            val notifier = notification.findHandler(sample) ?: return
+            notifier.handle(notification, sample)
         } catch (ex: Exception) {
             sample.stop(handledMetric("failed", ex.javaClass.simpleName))
-            log.warn("Failed to process the notification", ex)
+            log.error("Failed to process the notification", ex)
+        }
+    }
+
+    /**
+     * Reads from the receiving byte array and tries to convert it to appropriate
+     * instance of [Notification] class. If it fails to convert the message, then
+     * it records the failure using [sample] and returns `null`.
+     */
+    private fun ByteArray.parseNotification(sample: Timer.Sample): Notification? {
+        val parsed = NotificationRequest.parseFrom(this)
+        val notification = parsed?.toNotification()
+        if (notification == null) {
+            sample.stop(handledMetric("failed", "InvalidNotificationType"))
+            log.warn("Apparently the notification is not one of SMS, CALL, EMAIL or PUSH")
+            return null
+        }
+
+        return notification
+    }
+
+    /**
+     * Finds a [Notifier] instance capable of handling the receiving notification. If it fails
+     * to do so, then it would record the failure as a metric and returns `null`.
+     */
+    private fun Notification.findHandler(sample: Timer.Sample): Notifier? {
+        val notifier = notifiers?.firstOrNull { it.canNotify(this) }
+        if (notifier == null) {
+            sample.stop(handledMetric("failed", "NoNotificationHandler"))
+            log.warn("Couldn't find a notifier capable of handling this particular notification: {}", this)
+            return null
+        }
+
+        return notifier
+    }
+
+    /**
+     * Will use the receiving notifier to handle the notification.
+     */
+    private fun Notifier.handle(notification: Notification, sample: Timer.Sample) {
+        when (val response = notify(notification)) {
+            is SuccessfulNotification -> {
+                sample.stop(handledMetric())
+                log.debug("Successfully handled a notification: {}", response)
+            }
+            is FailedNotification -> {
+                val reason = response.exception?.javaClass?.simpleName ?: "Unknown"
+                sample.stop(handledMetric("failed", reason))
+                log.warn("Failed to deliver a notification: {}", response)
+            }
         }
     }
 
@@ -90,9 +124,10 @@ class NotificationDispatcher(@Autowired(required = false) private val notifiers:
      */
     private fun handledMetric(status: String = "ok", exception: String = "none") =
         Timer.builder("notifier.notifications.handled")
-            .publishPercentiles(50.0, 75.0, 90.0, 95.0, 99.0)
             .tag("status", status)
             .tag("exception", exception)
+            .publishPercentileHistogram()
+            .publishPercentiles(0.5, 0.75, 0.9, 0.95, 0.99)
             .register(meterRegistry)
 
     /**
@@ -101,8 +136,8 @@ class NotificationDispatcher(@Autowired(required = false) private val notifiers:
      */
     private fun NotificationRequest.toNotification(): Notification? {
         return when (type) {
-            NotificationRequest.Type.SMS -> SmsNotification(message, recipientsList.toSet())
-            NotificationRequest.Type.CALL -> CallNotification(message, recipientsList.toSet())
+            NotificationRequest.Type.SMS -> SmsNotification(message, recipientList.toSet())
+            NotificationRequest.Type.CALL -> CallNotification(message, recipientList.toSet())
             else -> null
         }
     }

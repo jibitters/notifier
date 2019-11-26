@@ -5,13 +5,15 @@ option java_package = "ir.jibit.notifier.stubs";
 message NotificationRequest {
     Type type = 1;
     string message = 2;
-    repeated string recipients = 3;
+    repeated string recipient = 3;
     string subject = 4;
     string body = 5;
 
     enum Type {
-        SMS = 0;
-        CALL = 1;
-        EMAIL = 2;
+        INVALID = 0;
+        SMS = 1;
+        CALL = 2;
+        EMAIL = 3;
+        PUSH = 4;
     }
 }

@@ -21,7 +21,8 @@ internal class ThrowablesTest {
 
     companion object {
 
-        @JvmStatic fun provideExceptions() = listOf(
+        @JvmStatic
+        fun provideExceptions() = listOf(
             arguments(null, ""),
             arguments(IllegalArgumentException(), "\njava.lang.IllegalArgumentException"),
             arguments(IllegalArgumentException("This is it"), "This is it\njava.lang.IllegalArgumentException")
