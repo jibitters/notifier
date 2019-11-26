@@ -10,6 +10,8 @@ import org.testcontainers.containers.wait.strategy.LogMessageWaitStrategy
 /**
  * A JUnit 5 extension to setup a Nats server before all tests and tearing it down
  * on after all of them.
+ *
+ * @author Ali Dehghani
  */
 class NatsExtension : BeforeAllCallback, AfterAllCallback {
 

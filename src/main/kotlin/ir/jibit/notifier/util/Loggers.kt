@@ -12,5 +12,7 @@ import org.slf4j.LoggerFactory
  * ```
  *     val log = logger<User>()
  * ```
+ *
+ * @author Ali Dehghani
  */
 inline fun <reified T> logger(): Logger = LoggerFactory.getLogger(T::class.java)

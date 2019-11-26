@@ -7,6 +7,8 @@ import retrofit2.http.Query
 
 /**
  * A Retrofit client responsible for abstracting the network call to Kavehnegar SMS and call API.
+ *
+ * @author Ali Dehghani
  */
 interface KavehnegarClient {
 

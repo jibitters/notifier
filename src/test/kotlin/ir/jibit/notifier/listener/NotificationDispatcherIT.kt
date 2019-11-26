@@ -2,11 +2,16 @@
 
 package ir.jibit.notifier.listener
 
-import com.nhaarman.mockitokotlin2.*
-import io.micrometer.core.instrument.MeterRegistry
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.argumentCaptor
+import com.nhaarman.mockitokotlin2.atMost
+import com.nhaarman.mockitokotlin2.doReturn
+import com.nhaarman.mockitokotlin2.stub
+import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
+import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import io.nats.client.Connection
 import ir.jibit.notifier.NatsExtension
-import ir.jibit.notifier.config.nats.NatsConfiguration
 import ir.jibit.notifier.provider.FailedNotification
 import ir.jibit.notifier.provider.Notifier
 import ir.jibit.notifier.provider.SuccessfulNotification
@@ -20,21 +25,20 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.ConfigFileApplicationContextInitializer
-import org.springframework.boot.test.context.TestConfiguration
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.context.annotation.ComponentScan
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
-import org.springframework.test.context.junit.jupiter.SpringExtension
+import org.springframework.test.context.TestPropertySource
 
 /**
  * Integration tests for notification dispatching subsystem.
+ *
+ * @author Ali Dehghani
  */
+@SpringBootTest
 @ActiveProfiles("test")
-@MockBean(MeterRegistry::class)
-@ExtendWith(SpringExtension::class, NatsExtension::class)
-@ContextConfiguration(initializers = [ConfigFileApplicationContextInitializer::class])
+@ExtendWith(NatsExtension::class)
+@TestPropertySource(properties = ["sms-providers.use=invalid"])
 internal class NotificationDispatcherIT {
 
     /**
@@ -122,8 +126,4 @@ internal class NotificationDispatcherIT {
     private fun waitForConsumerToCatchUp() {
         Thread.sleep(1000)
     }
-
-    @TestConfiguration
-    @ComponentScan(basePackageClasses = [NatsConfiguration::class, NotificationDispatcher::class])
-    protected class NotificationDispatcherITConfig
 }

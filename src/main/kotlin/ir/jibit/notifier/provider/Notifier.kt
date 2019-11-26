@@ -3,6 +3,8 @@ package ir.jibit.notifier.provider
 /**
  * Defines a contract to handle notifications. The [notify] should be used iff
  * the call to [canNotify] for the same notification returns true.
+ *
+ * @author Ali Dehghani
  */
 interface Notifier {
 

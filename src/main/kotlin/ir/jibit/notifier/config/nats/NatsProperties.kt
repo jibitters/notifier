@@ -8,6 +8,8 @@ import javax.validation.constraints.NotNull
 
 /**
  * Encapsulates configuration properties to customize the behavior of the notifier.
+ *
+ * @author Ali Dehghani
  */
 @Validated
 @ConstructorBinding

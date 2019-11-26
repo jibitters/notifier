@@ -14,6 +14,8 @@ import javax.annotation.PreDestroy
 /**
  * Configuration responsible for creating a Nats connection and a dispatcher to
  * listen for new messages and forwards them to appropriate notification providers.
+ *
+ * @author Ali Dehghani
  */
 @Configuration
 @EnableConfigurationProperties(NatsProperties::class)

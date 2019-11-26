@@ -7,6 +7,8 @@ import org.springframework.context.annotation.Configuration
 
 /**
  * Contains HTTP client configurations.
+ *
+ * @author Ali Dehghani
  */
 @Configuration
 @EnableConfigurationProperties(HttpProperties::class)

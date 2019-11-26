@@ -18,6 +18,8 @@ import java.io.IOException
  *
  * @param properties Encapsulates the Kavehnegar related properties.
  * @param okHttpClient The OK HTTP client used to send requests to Kavehnegar.
+ *
+ * @author Ali Dehghani
  */
 @Service
 @EnableConfigurationProperties(KavehnegarProperties::class)

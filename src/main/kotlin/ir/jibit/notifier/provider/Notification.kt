@@ -4,6 +4,8 @@ import ir.jibit.notifier.util.stackTrace
 
 /**
  * Abstract supertype for all notification request types.
+ *
+ * @author Ali Dehghani
  */
 interface Notification
 
@@ -16,12 +18,16 @@ interface Notification
  *     is FailedNotification -> // failed case
  * }
  * ```
+ *
+ * @author Ali Dehghani
  */
 sealed class NotificationResponse
 
 /**
  * Encapsulates all necessary information about the failed notification. The client can optionally
  * pass an instance of [Throwable] to specify what exactly went wrong.
+ *
+ * @author Ali Dehghani
  */
 class FailedNotification(val exception: Throwable? = null, val log: String? = null) : NotificationResponse() {
 
@@ -36,6 +42,8 @@ class FailedNotification(val exception: Throwable? = null, val log: String? = nu
 /**
  * Encapsulates all necessary information about the successful notification. The client can optionally
  * use [log] to store more logs about the response.
+ *
+ * @author Ali Dehghani
  */
 class SuccessfulNotification(val log: String? = null) : NotificationResponse() {
 

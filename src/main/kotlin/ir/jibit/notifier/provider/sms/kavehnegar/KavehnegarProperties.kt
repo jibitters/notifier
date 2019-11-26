@@ -7,6 +7,8 @@ import javax.validation.constraints.NotBlank
 
 /**
  * Encapsulates Kavehnegar related configuration properties.
+ *
+ * @author Ali Dehghani
  */
 @Validated
 @ConstructorBinding
