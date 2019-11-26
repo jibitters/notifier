@@ -29,24 +29,23 @@ class NatsConfiguration {
     /**
      * The Nats connection.
      */
-    private var connection: Connection? = null
+    private lateinit var connection: Connection
 
     /**
      * Creates a new Nats connection at application start and dispatches a new listener to handle
      * incoming messages.
      */
     @Bean
-    fun connection(properties: NatsProperties, dispatcher: NotificationDispatcher): Connection {
+    fun createConnection(properties: NatsProperties, dispatcher: NotificationDispatcher): Connection {
         val options = Options.Builder()
             .servers(properties.servers!!.toTypedArray())
             .executor(Executors.newWorkStealingPool(properties.poolSize!!))
             .build()
 
         connection = Nats.connect(options)
-        connection!!.createDispatcher { dispatcher.dispatch(it.data) }
-            .subscribe(properties.subject, "notifier-group")
+        connection.createDispatcher { dispatcher.dispatch(it.data) }.subscribe(properties.subject, "notifier-group")
 
-        return connection!!
+        return connection
     }
 
     /**
@@ -55,7 +54,9 @@ class NatsConfiguration {
     @PreDestroy
     fun closeConnection() {
         log.info("About to shutdown the Nats connection")
-        connection?.close()
+        if (::connection.isInitialized) {
+            connection.close()
+        }
         log.info("Nats connection has been destroyed")
     }
 }
