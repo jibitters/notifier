@@ -65,7 +65,7 @@ class NotificationDispatcher(@Autowired(required = false) private val notifiers:
      * All these operations can terminate successfully or exceptionally. Both situations are going
      * to be recorded as Micrometer metrics.
      */
-    private fun ByteArray.process() {
+    private suspend fun ByteArray.process() {
         val sample = Timer.start(meterRegistry)
         try {
             val notification = parseNotification(sample) ?: return
@@ -112,7 +112,7 @@ class NotificationDispatcher(@Autowired(required = false) private val notifiers:
     /**
      * Will use the receiving notifier to handle the notification.
      */
-    private fun Notifier.handle(notification: Notification, sample: Timer.Sample) {
+    private suspend fun Notifier.handle(notification: Notification, sample: Timer.Sample) {
         when (val response = notify(notification)) {
             is SuccessfulNotification -> {
                 sample.stop(handledMetric())

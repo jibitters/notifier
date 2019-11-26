@@ -1,6 +1,6 @@
 package ir.jibit.notifier.provider.sms.kavehnegar
 
-import retrofit2.Call
+import retrofit2.Response
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -21,10 +21,10 @@ interface KavehnegarClient {
      * @param sender The phone number which will be shown as the sender to receptors.
      */
     @POST("/v1/{api-token}/sms/send.json")
-    fun sendSms(@Path("api-token") token: String,
+    suspend fun sendSms(@Path("api-token") token: String,
                         @Query("receptor") receptors: String?,
                         @Query("message") message: String,
-                        @Query("sender") sender: String): Call<String>
+                        @Query("sender") sender: String): Response<String>
 
     /**
      * Make voice call.
@@ -34,7 +34,7 @@ interface KavehnegarClient {
      * @param message The message to send.
      */
     @POST("/v1/{api-token}/call/maketts.json")
-    fun makeCall(@Path("api-token") token: String,
+    suspend fun makeCall(@Path("api-token") token: String,
                          @Query("receptor") receptors: String?,
-                         @Query("message") message: String): Call<String>
+                         @Query("message") message: String): Response<String>
 }

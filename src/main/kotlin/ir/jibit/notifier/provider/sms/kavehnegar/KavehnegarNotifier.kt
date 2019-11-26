@@ -1,6 +1,10 @@
 package ir.jibit.notifier.provider.sms.kavehnegar
 
-import ir.jibit.notifier.provider.*
+import ir.jibit.notifier.provider.FailedNotification
+import ir.jibit.notifier.provider.Notification
+import ir.jibit.notifier.provider.NotificationResponse
+import ir.jibit.notifier.provider.Notifier
+import ir.jibit.notifier.provider.SuccessfulNotification
 import ir.jibit.notifier.provider.sms.CallNotification
 import ir.jibit.notifier.provider.sms.SmsNotification
 import okhttp3.OkHttpClient
@@ -10,7 +14,6 @@ import org.springframework.stereotype.Service
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.scalars.ScalarsConverterFactory
-import java.io.IOException
 
 /**
  * A Kavehnegar implementation of [Notifier] responsible for sending text messages and
@@ -46,7 +49,8 @@ class KavehnegarNotifier(private val properties: KavehnegarProperties,
     /**
      * Builds the HTTP request and sends it to Kavehnegar
      */
-    override fun notify(notification: Notification): NotificationResponse {
+    @Suppress("BlockingMethodInNonBlockingContext")
+    override suspend fun notify(notification: Notification): NotificationResponse {
         try {
             val response = when (notification) {
                 is CallNotification -> makeCall(notification)
@@ -59,7 +63,7 @@ class KavehnegarNotifier(private val properties: KavehnegarProperties,
                 return FailedNotification(log = errorBody)
 
             return SuccessfulNotification(response.body())
-        } catch (ex: IOException) {
+        } catch (ex: Exception) {
             return FailedNotification(ex)
         }
     }
@@ -67,20 +71,20 @@ class KavehnegarNotifier(private val properties: KavehnegarProperties,
     /**
      * Responsible to call the make call API.
      */
-    private fun makeCall(notification: Notification): Response<String> {
+    private suspend fun makeCall(notification: Notification): Response<String> {
         notification as CallNotification
         val receptors = notification.recipients.joinToString()
 
-        return client.makeCall(properties.token!!, receptors, notification.message).execute()
+        return client.makeCall(properties.token!!, receptors, notification.message)
     }
 
     /**
      * Responsible to call the send sms API.
      */
-    private fun sendSms(notification: Notification): Response<String> {
+    private suspend fun sendSms(notification: Notification): Response<String> {
         notification as SmsNotification
         val receptors = notification.recipients.joinToString()
 
-        return client.sendSms(properties.token!!, receptors, notification.message, properties.sender!!).execute()
+        return client.sendSms(properties.token!!, receptors, notification.message, properties.sender!!)
     }
 }
