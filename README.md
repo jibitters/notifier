@@ -46,7 +46,7 @@ specifications residing the [`src/main/proto`](src/main/proto) directory.
 For example, here's how we can create a notification request in Kotlin:
 ```kotlin
 val request = NotificationRequest.newBuilder()
-        .setType(SMS)
+        .setNotificationType(SMS)
         .setMessage("Hello from Notifier")
         .addRecipient("09124242424")
         .build()

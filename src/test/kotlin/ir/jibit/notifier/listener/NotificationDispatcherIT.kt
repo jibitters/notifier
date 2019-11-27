@@ -2,15 +2,7 @@
 
 package ir.jibit.notifier.listener
 
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.argumentCaptor
-import com.nhaarman.mockitokotlin2.atMost
-import com.nhaarman.mockitokotlin2.doReturn
-import com.nhaarman.mockitokotlin2.reset
-import com.nhaarman.mockitokotlin2.stub
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
-import com.nhaarman.mockitokotlin2.verifyZeroInteractions
+import com.nhaarman.mockitokotlin2.*
 import io.micrometer.core.instrument.MeterRegistry
 import io.nats.client.Connection
 import ir.jibit.notifier.NatsExtension
@@ -20,9 +12,7 @@ import ir.jibit.notifier.provider.SuccessfulNotification
 import ir.jibit.notifier.provider.sms.CallNotification
 import ir.jibit.notifier.provider.sms.SmsNotification
 import ir.jibit.notifier.stubs.Notification.NotificationRequest
-import ir.jibit.notifier.stubs.Notification.NotificationRequest.Type.CALL
-import ir.jibit.notifier.stubs.Notification.NotificationRequest.Type.INVALID
-import ir.jibit.notifier.stubs.Notification.NotificationRequest.Type.SMS
+import ir.jibit.notifier.stubs.Notification.NotificationRequest.Type.*
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -100,7 +90,7 @@ internal class NotificationDispatcherIT {
 
     @Test
     fun `Dispatch -- Invalid Type -- Should Return Silently and Record Metrics`() {
-        val request = NotificationRequest.newBuilder().setType(INVALID).build()
+        val request = NotificationRequest.newBuilder().setNotificationType(INVALID).build()
         connection.publish("notifier.notifications.sms", request.toByteArray())
         waitForConsumerToCatchUp()
 
@@ -118,7 +108,7 @@ internal class NotificationDispatcherIT {
     @Test
     fun `Dispatch -- Nobody Can Handle It -- Then Should Return Silently and Record the Failure`() {
         reset(smsProvider, callProvider)
-        val request = NotificationRequest.newBuilder().setType(SMS).build()
+        val request = NotificationRequest.newBuilder().setNotificationType(SMS).build()
         connection.publish("notifier.notifications.sms", request.toByteArray())
         waitForConsumerToCatchUp()
 
@@ -144,7 +134,7 @@ internal class NotificationDispatcherIT {
         }
 
         val request = NotificationRequest.newBuilder()
-            .setType(SMS)
+            .setNotificationType(SMS)
             .addRecipient("09121231234")
             .setMessage("Message")
             .build()
@@ -177,7 +167,7 @@ internal class NotificationDispatcherIT {
         }
 
         val request = NotificationRequest.newBuilder()
-            .setType(CALL)
+            .setNotificationType(CALL)
             .addRecipient("09121231234")
             .setMessage("Message")
             .build()

@@ -142,7 +142,7 @@ class NotificationDispatcher(@Autowired(required = false) private val notifiers:
      * `null` when the notification type is invalid.
      */
     private fun NotificationRequest.toNotification(): Notification? {
-        return when (type) {
+        return when (notificationType) {
             NotificationRequest.Type.SMS -> SmsNotification(message, recipientList.toSet())
             NotificationRequest.Type.CALL -> CallNotification(message, recipientList.toSet())
             else -> null
