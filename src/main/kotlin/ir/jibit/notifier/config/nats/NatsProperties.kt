@@ -4,7 +4,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding
 import org.springframework.validation.annotation.Validated
 import javax.validation.constraints.NotEmpty
-import javax.validation.constraints.NotNull
 
 /**
  * Encapsulates configuration properties to customize the behavior of the notifier.
@@ -23,14 +22,17 @@ class NatsProperties(
     val servers: Set<String>? = null,
 
     /**
-     * Determines the core pool size of the thread pool executor response for dispatching messages.
+     * Determines the core pool size of the thread pool executor response for receiving messages.
      */
-    @field:NotNull(message = "The core pool size of NATS dispatcher is required (nats.pool-size)")
-    val poolSize: Int? = Runtime.getRuntime().availableProcessors(),
+    val poolSize: Int = Runtime.getRuntime().availableProcessors(),
 
     /**
      * The NATS topic to listen to.
      */
-    @field:NotNull(message = "You should specify a topic to listen for incoming notification requests (nats.subject)")
-    val subject: String? = "notifier.notifications.*"
+    val subject: String = "notifier.notifications.*",
+
+    /**
+     * The prefix for event-loop threads.
+     */
+    val threadPrefix: String = "notifier-loop"
 )

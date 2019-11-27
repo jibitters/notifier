@@ -3,12 +3,15 @@ package ir.jibit.notifier.config.nats
 import io.nats.client.Connection
 import io.nats.client.Nats
 import io.nats.client.Options
+import ir.jibit.notifier.config.PrefixedThreadFactory
 import ir.jibit.notifier.listener.NotificationDispatcher
 import ir.jibit.notifier.util.logger
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import java.util.concurrent.Executors
+import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit.MILLISECONDS
 import javax.annotation.PreDestroy
 
 /**
@@ -37,9 +40,12 @@ class NatsConfiguration {
      */
     @Bean
     fun createConnection(properties: NatsProperties, dispatcher: NotificationDispatcher): Connection {
+        val loopExecutor = ThreadPoolExecutor(properties.poolSize, properties.poolSize, 0, MILLISECONDS,
+            LinkedBlockingQueue(), PrefixedThreadFactory(properties.threadPrefix))
+
         val options = Options.Builder()
             .servers(properties.servers!!.toTypedArray())
-            .executor(Executors.newWorkStealingPool(properties.poolSize!!))
+            .executor(loopExecutor)
             .build()
 
         connection = Nats.connect(options)
