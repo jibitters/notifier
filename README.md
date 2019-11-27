@@ -6,7 +6,7 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![made-with-kotlin](https://img.shields.io/badge/Made%20with-Kotlin-ed55e3.svg)](https://kotlinlang.org)
 
-<p align="center"><b>A Scalable Notification Processing System Supporting Different Notification Protocols.</b></p>
+<p align="center"><b>A Scalable Notification Processing System Supporting Different Notification Protocols</b></p>
 
 Getting Started
 ----------------
@@ -48,7 +48,7 @@ For example, here's how we can create a notification request in Kotlin:
 val request = NotificationRequest.newBuilder()
         .setType(SMS)
         .setMessage("Hello from Notifier")
-        .addRecipients("09124242424")
+        .addRecipient("09124242424")
         .build()
 ```
 Then we can use the Nats client to publish the request:

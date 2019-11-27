@@ -2,6 +2,7 @@
 
 package ir.jibit.notifier.provider.sms.kavehnegar
 
+import ir.jibit.notifier.config.dispatcher.IoDispatcher
 import ir.jibit.notifier.config.http.HttpConfiguration
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -44,6 +45,6 @@ internal class KavehnegarNotifierContextIT {
      * A simple test configuration to pickup the required notifiers.
      */
     @TestConfiguration
-    @ComponentScan(basePackageClasses = [KavehnegarNotifier::class, HttpConfiguration::class])
+    @ComponentScan(basePackageClasses = [KavehnegarNotifier::class, HttpConfiguration::class, IoDispatcher::class])
     protected class KavehnegarNotifierContextITConfig
 }

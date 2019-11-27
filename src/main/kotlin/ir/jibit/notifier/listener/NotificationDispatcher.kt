@@ -15,32 +15,27 @@ import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.launch
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
-import java.util.concurrent.Executors
-import java.util.concurrent.ThreadFactory
-import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.ExecutorService
 
 /**
  * A simple factory over all [Notifier] implementations which receives all incoming notification
  * requests and dispatches them to appropriate [Notifier] implementations.
  *
  * @param notifiers Collection of all [Notifier] implementations that are registered as Spring beans.
+ * @param ioExecutor The executor service responsible for processing notification requests.
  * @param meterRegistry To register and expose metrics about how well the notification handlers are doing.
  *
  * @author Ali Dehghani
  */
 @Component
 class NotificationDispatcher(@Autowired(required = false) private val notifiers: List<Notifier>?,
+                             @Autowired private val ioExecutor: ExecutorService,
                              private val meterRegistry: MeterRegistry) {
 
     /**
      * The logger.
      */
     private val log = logger<NotificationDispatcher>()
-
-    /**
-     * An executor service responsible for executing actual IO operations.
-     */
-    private val ioExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2, threadFactory())
 
     /**
      * A [CoroutineScope] backed by the [ioExecutor].
@@ -151,21 +146,6 @@ class NotificationDispatcher(@Autowired(required = false) private val notifiers:
             NotificationRequest.Type.SMS -> SmsNotification(message, recipientList.toSet())
             NotificationRequest.Type.CALL -> CallNotification(message, recipientList.toSet())
             else -> null
-        }
-    }
-
-    /**
-     * A thread factory with customized thread names!
-     */
-    private fun threadFactory() = object : ThreadFactory {
-
-        /**
-         * Will be used to generate unique thread names.
-         */
-        private val counter = AtomicInteger(1)
-
-        override fun newThread(code: Runnable): Thread {
-            return Thread(code, "notifier-io-dispatcher-${counter.getAndIncrement()}")
         }
     }
 }

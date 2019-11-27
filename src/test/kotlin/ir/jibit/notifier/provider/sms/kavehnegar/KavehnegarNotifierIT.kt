@@ -5,6 +5,7 @@ package ir.jibit.notifier.provider.sms.kavehnegar
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.http.Fault.MALFORMED_RESPONSE_CHUNK
 import ir.jibit.notifier.WireMockExtension
+import ir.jibit.notifier.config.dispatcher.IoDispatcher
 import ir.jibit.notifier.config.http.HttpConfiguration
 import ir.jibit.notifier.provider.FailedNotification
 import ir.jibit.notifier.provider.Notification
@@ -236,7 +237,7 @@ internal class KavehnegarNotifierIT {
      * A simple test configuration to pickup the required notifiers.
      */
     @TestConfiguration
-    @ComponentScan(basePackageClasses = [KavehnegarNotifier::class, HttpConfiguration::class])
+    @ComponentScan(basePackageClasses = [KavehnegarNotifier::class, HttpConfiguration::class, IoDispatcher::class])
     protected class KavehnegarNotifierITConfig
 
     /**

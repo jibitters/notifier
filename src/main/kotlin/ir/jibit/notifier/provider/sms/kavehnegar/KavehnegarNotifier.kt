@@ -1,10 +1,6 @@
 package ir.jibit.notifier.provider.sms.kavehnegar
 
-import ir.jibit.notifier.provider.FailedNotification
-import ir.jibit.notifier.provider.Notification
-import ir.jibit.notifier.provider.NotificationResponse
-import ir.jibit.notifier.provider.Notifier
-import ir.jibit.notifier.provider.SuccessfulNotification
+import ir.jibit.notifier.provider.*
 import ir.jibit.notifier.provider.sms.CallNotification
 import ir.jibit.notifier.provider.sms.SmsNotification
 import okhttp3.OkHttpClient
@@ -14,6 +10,7 @@ import org.springframework.stereotype.Service
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.scalars.ScalarsConverterFactory
+import java.util.concurrent.ExecutorService
 
 /**
  * A Kavehnegar implementation of [Notifier] responsible for sending text messages and
@@ -21,6 +18,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory
  *
  * @param properties Encapsulates the Kavehnegar related properties.
  * @param okHttpClient The OK HTTP client used to send requests to Kavehnegar.
+ * @param ioDispatcher Making sure we're using the same IO thread pool for all IO operations.
  *
  * @author Ali Dehghani
  */
@@ -28,13 +26,15 @@ import retrofit2.converter.scalars.ScalarsConverterFactory
 @EnableConfigurationProperties(KavehnegarProperties::class)
 @ConditionalOnProperty(name = ["sms-providers.use"], havingValue = "kavehnegar")
 class KavehnegarNotifier(private val properties: KavehnegarProperties,
-                         private val okHttpClient: OkHttpClient) : Notifier {
+                         private val okHttpClient: OkHttpClient,
+                         ioDispatcher: ExecutorService) : Notifier {
 
     /**
      * Retrofit client to send requests to Kavehnegar.
      */
     private val client = Retrofit.Builder()
         .client(okHttpClient)
+        .callbackExecutor(ioDispatcher)
         .addConverterFactory(ScalarsConverterFactory.create())
         .baseUrl(properties.baseUrl!!)
         .build()
