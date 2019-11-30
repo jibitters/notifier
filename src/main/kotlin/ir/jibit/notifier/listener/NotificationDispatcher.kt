@@ -10,7 +10,9 @@ import ir.jibit.notifier.provider.mail.MailNotification
 import ir.jibit.notifier.provider.sms.CallNotification
 import ir.jibit.notifier.provider.sms.SmsNotification
 import ir.jibit.notifier.stubs.Notification.NotificationRequest
-import ir.jibit.notifier.stubs.Notification.NotificationRequest.Type.*
+import ir.jibit.notifier.stubs.Notification.NotificationRequest.Type.CALL
+import ir.jibit.notifier.stubs.Notification.NotificationRequest.Type.EMAIL
+import ir.jibit.notifier.stubs.Notification.NotificationRequest.Type.SMS
 import ir.jibit.notifier.util.logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.asCoroutineDispatcher
@@ -45,13 +47,23 @@ class NotificationDispatcher(@Autowired(required = false) private val notifiers:
     private val ioScope = CoroutineScope(ioExecutor.asCoroutineDispatcher())
 
     /**
-     * Simply submits the incoming request to the executor and returns immediately.
+     * Simply submits the incoming request to the executor and returns immediately. Also, records
+     * the amount of time took us to submit the new notification request.
      */
     fun dispatch(message: ByteArray) {
+        val timer = Timer.start(meterRegistry)
+
         ioScope.launch {
             meterRegistry.counter("notifier.notifications.received").increment()
             message.process()
         }
+
+        val submittedMetric = Timer
+            .builder("notifier.notifications.submitted")
+            .publishPercentileHistogram()
+            .publishPercentiles(0.5, 0.75, 0.90, 0.95, 0.99)
+            .register(meterRegistry)
+        timer.stop(submittedMetric)
     }
 
     /**
@@ -64,13 +76,17 @@ class NotificationDispatcher(@Autowired(required = false) private val notifiers:
      */
     private suspend fun ByteArray.process() {
         val sample = Timer.start(meterRegistry)
+        var notificationType = "invalid"
         try {
-            val notification = parseNotification(sample) ?: return
-            val notifier = notification.findHandler(sample) ?: return
-            notifier.handle(notification, sample)
-        } catch (ex: Exception) {
-            sample.stop(handledMetric("failed", ex.javaClass.simpleName))
-            log.error("Failed to process the notification", ex)
+            val result = parseNotification(sample) ?: return
+            val notification = result.first
+            notificationType = result.second
+
+            val notifier = notification.findHandler(sample, notificationType) ?: return
+            notifier.handle(notification, notificationType, sample)
+        } catch (e: Exception) {
+            sample.stop(handledMetric("failed", e.javaClass.simpleName, notificationType))
+            log.error("Failed to process the notification", e)
         }
     }
 
@@ -78,8 +94,11 @@ class NotificationDispatcher(@Autowired(required = false) private val notifiers:
      * Reads from the receiving byte array and tries to convert it to appropriate
      * instance of [Notification] class. If it fails to convert the message, then
      * it records the failure using [sample] and returns `null`.
+     *
+     * Also, on successful attempts, it would return the notification type as the second
+     * element of a pair.
      */
-    private fun ByteArray.parseNotification(sample: Timer.Sample): Notification? {
+    private fun ByteArray.parseNotification(sample: Timer.Sample): Pair<Notification, String>? {
         val parsed = NotificationRequest.parseFrom(this)
         val notification = parsed?.toNotification()
         if (notification == null) {
@@ -88,17 +107,18 @@ class NotificationDispatcher(@Autowired(required = false) private val notifiers:
             return null
         }
 
-        return notification
+        val notificationType = parsed.notificationType.name.toLowerCase()
+        return notification to notificationType
     }
 
     /**
      * Finds a [Notifier] instance capable of handling the receiving notification. If it fails
      * to do so, then it would record the failure as a metric and returns `null`.
      */
-    private fun Notification.findHandler(sample: Timer.Sample): Notifier? {
+    private fun Notification.findHandler(sample: Timer.Sample, notificationType: String): Notifier? {
         val notifier = notifiers?.firstOrNull { it.canNotify(this) }
         if (notifier == null) {
-            sample.stop(handledMetric("failed", "NoNotificationHandler"))
+            sample.stop(handledMetric("failed", "NoNotificationHandler", notificationType))
             log.warn("Couldn't find a notifier capable of handling this particular notification: {}", this)
             return null
         }
@@ -109,15 +129,15 @@ class NotificationDispatcher(@Autowired(required = false) private val notifiers:
     /**
      * Will use the receiving notifier to handle the notification.
      */
-    private suspend fun Notifier.handle(notification: Notification, sample: Timer.Sample) {
+    private suspend fun Notifier.handle(notification: Notification, notificationType: String, sample: Timer.Sample) {
         when (val response = notify(notification)) {
             is SuccessfulNotification -> {
-                sample.stop(handledMetric())
+                sample.stop(handledMetric(type = notificationType))
                 log.debug("Successfully handled a notification: {}", response)
             }
             is FailedNotification -> {
                 val reason = response.exception?.javaClass?.simpleName ?: "Unknown"
-                sample.stop(handledMetric("failed", reason))
+                sample.stop(handledMetric("failed", reason, notificationType))
                 log.warn("Failed to deliver a notification: {}", response)
             }
         }
@@ -130,11 +150,13 @@ class NotificationDispatcher(@Autowired(required = false) private val notifiers:
      *               "ok" or "failed".
      * @param exception If the result is "failed", then represents the reason behind the failure.
      *                  Otherwise, it's always should be equal to "none".
+     * @param type Represents the notification type this metrics is related to.
      */
-    private fun handledMetric(status: String = "ok", exception: String = "none") =
+    private fun handledMetric(status: String = "ok", exception: String = "none", type: String = "invalid") =
         Timer.builder("notifier.notifications.handled")
             .tag("status", status)
             .tag("exception", exception)
+            .tag("type", type)
             .publishPercentileHistogram()
             .publishPercentiles(0.5, 0.75, 0.9, 0.95, 0.99)
             .register(meterRegistry)

@@ -63,8 +63,8 @@ class KavehnegarNotifier(private val properties: KavehnegarProperties,
                 return FailedNotification(log = errorBody)
 
             return SuccessfulNotification(response.body())
-        } catch (ex: Exception) {
-            return FailedNotification(ex)
+        } catch (e: Exception) {
+            return FailedNotification(e)
         }
     }
 
