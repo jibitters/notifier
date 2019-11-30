@@ -1,5 +1,7 @@
 package ir.jibit.notifier.provider.mail
 
+import ir.jibit.notifier.provider.Notification
+
 /**
  * Encapsulates the details for mail notification request.
  *
@@ -25,5 +27,16 @@ class MailNotification(
     /**
      * From whom we're going to send this email.
      */
-    val sender: String? = null
-)
+    val sender: String? = null,
+
+    /**
+     * Who's gonna be CC-ed?
+     */
+    val cc: Set<String> = emptySet(),
+
+    /**
+     * Who's gonna be BCC-ed?
+     */
+    val bcc: Set<String> = emptySet()
+
+) : Notification
