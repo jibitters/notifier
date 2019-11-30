@@ -30,6 +30,11 @@ class MailExtension : BeforeAllCallback {
         /**
          * The wiser server.
          */
-        private val server: Wiser by lazy { Wiser() }
+        private val server: Wiser by lazy {
+            val wiser = Wiser()
+            wiser.setPort(2500)
+
+            wiser
+        }
     }
 }

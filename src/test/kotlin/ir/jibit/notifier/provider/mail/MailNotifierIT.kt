@@ -33,7 +33,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @ActiveProfiles("test")
 @ExtendWith(SpringExtension::class, MailExtension::class)
 @ContextConfiguration(initializers = [ConfigFileApplicationContextInitializer::class])
-@TestPropertySource(properties = ["spring.mail.host=localhost", "spring.mail.port=25"])
+@TestPropertySource(properties = ["spring.mail.host=localhost", "spring.mail.port=2500"])
 internal class MailNotifierIT {
 
     /**
