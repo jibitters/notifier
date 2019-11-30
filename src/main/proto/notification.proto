@@ -3,11 +3,14 @@ syntax = "proto3";
 option java_package = "ir.jibit.notifier.stubs";
 
 message NotificationRequest {
-    Type type = 1;
+    Type notificationType = 1;
     string message = 2;
     repeated string recipient = 3;
     string subject = 4;
     string body = 5;
+    string sender = 6;
+    repeated string cc = 7;
+    repeated string bcc = 8;
 
     enum Type {
         INVALID = 0;

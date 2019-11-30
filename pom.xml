@@ -33,6 +33,7 @@
         <retrofit.version>2.6.2</retrofit.version>
         <wiremock.version>2.21.0</wiremock.version>
         <mockito-kotlin.version>2.2.0</mockito-kotlin.version>
+        <wiser.version>1.2</wiser.version>
     </properties>
 
     <dependencies>
@@ -44,6 +45,10 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
@@ -130,6 +135,12 @@
             <groupId>com.nhaarman.mockitokotlin2</groupId>
             <artifactId>mockito-kotlin</artifactId>
             <version>${mockito-kotlin.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.subethamail</groupId>
+            <artifactId>subethasmtp-wiser</artifactId>
+            <version>${wiser.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

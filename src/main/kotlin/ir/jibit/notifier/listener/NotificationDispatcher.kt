@@ -6,9 +6,11 @@ import ir.jibit.notifier.provider.FailedNotification
 import ir.jibit.notifier.provider.Notification
 import ir.jibit.notifier.provider.Notifier
 import ir.jibit.notifier.provider.SuccessfulNotification
+import ir.jibit.notifier.provider.mail.MailNotification
 import ir.jibit.notifier.provider.sms.CallNotification
 import ir.jibit.notifier.provider.sms.SmsNotification
 import ir.jibit.notifier.stubs.Notification.NotificationRequest
+import ir.jibit.notifier.stubs.Notification.NotificationRequest.Type.*
 import ir.jibit.notifier.util.logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.asCoroutineDispatcher
@@ -142,9 +144,10 @@ class NotificationDispatcher(@Autowired(required = false) private val notifiers:
      * `null` when the notification type is invalid.
      */
     private fun NotificationRequest.toNotification(): Notification? {
-        return when (type) {
-            NotificationRequest.Type.SMS -> SmsNotification(message, recipientList.toSet())
-            NotificationRequest.Type.CALL -> CallNotification(message, recipientList.toSet())
+        return when (notificationType) {
+            SMS -> SmsNotification(message, recipientList.toSet())
+            CALL -> CallNotification(message, recipientList.toSet())
+            EMAIL -> MailNotification(subject, body, recipientList.toSet(), sender, ccList.toSet(), bccList.toSet())
             else -> null
         }
     }
