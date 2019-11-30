@@ -9,6 +9,7 @@ import ir.jibit.notifier.NatsExtension
 import ir.jibit.notifier.provider.FailedNotification
 import ir.jibit.notifier.provider.Notifier
 import ir.jibit.notifier.provider.SuccessfulNotification
+import ir.jibit.notifier.provider.mail.MailNotification
 import ir.jibit.notifier.provider.sms.CallNotification
 import ir.jibit.notifier.provider.sms.SmsNotification
 import ir.jibit.notifier.stubs.Notification.NotificationRequest
@@ -108,12 +109,12 @@ internal class NotificationDispatcherIT {
     @Test
     fun `Dispatch -- Nobody Can Handle It -- Then Should Return Silently and Record the Failure`() {
         reset(smsProvider, callProvider)
-        val request = NotificationRequest.newBuilder().setNotificationType(SMS).build()
+        val request = NotificationRequest.newBuilder().setNotificationType(EMAIL).build()
         connection.publish("notifier.notifications.sms", request.toByteArray())
         waitForConsumerToCatchUp()
 
-        verify(smsProvider).canNotify(any<SmsNotification>())
-        verify(callProvider).canNotify(any<SmsNotification>())
+        verify(smsProvider).canNotify(any<MailNotification>())
+        verify(callProvider).canNotify(any<MailNotification>())
         verifyNoMoreInteractions(smsProvider, callProvider)
 
         val received = receivedCounter()
