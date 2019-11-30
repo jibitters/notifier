@@ -1,7 +1,7 @@
 package ir.jibit.notifier.provider.mail
 
 import ir.jibit.notifier.provider.*
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.mail.SimpleMailMessage
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.stereotype.Component
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component
  * @author Ali Dehghani
  */
 @Component
-@ConditionalOnBean(JavaMailSender::class)
+@ConditionalOnProperty(prefix = "spring.mail", name = ["host"])
 class MailNotifier(private val mailSender: JavaMailSender) : Notifier {
 
     /**
