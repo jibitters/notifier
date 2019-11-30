@@ -130,7 +130,7 @@ internal class NotificationDispatcherIT {
         verifyNoMoreInteractions(smsProvider, callProvider)
 
         val received = receivedCounter()
-        val handled = handledTimer("failed", "NoNotificationHandler")
+        val handled = handledTimer("failed", "NoNotificationHandler", "email")
         val submitted = submittedTimer()
 
         assertThat(received.count()).isOne()
@@ -169,7 +169,7 @@ internal class NotificationDispatcherIT {
         assertThat(captor.firstValue.recipients).contains("09121231234")
 
         val received = receivedCounter()
-        val handled = handledTimer("failed", expected)
+        val handled = handledTimer("failed", expected, "sms")
         val submitted = submittedTimer()
 
         assertThat(received.count()).isOne()
@@ -208,7 +208,7 @@ internal class NotificationDispatcherIT {
         assertThat(captor.firstValue.recipients).contains("09121231234")
 
         val received = receivedCounter()
-        val handled = handledTimer()
+        val handled = handledTimer(type = "call")
         val submitted = submittedTimer()
 
         assertThat(received.count()).isOne()
@@ -224,8 +224,9 @@ internal class NotificationDispatcherIT {
 
     private fun receivedCounter() = meterRegistry.get("notifier.notifications.received").counter()
 
-    private fun handledTimer(status: String = "ok", exception: String = "none") =
-        meterRegistry.get("notifier.notifications.handled").tag("status", status).tag("exception", exception).timer()
+    private fun handledTimer(status: String = "ok", exception: String = "none", type: String = "invalid") =
+        meterRegistry.get("notifier.notifications.handled")
+            .tag("status", status).tag("exception", exception).tag("type", type).timer()
 
     private fun submittedTimer() = meterRegistry.get("notifier.notifications.submitted").timer()
 

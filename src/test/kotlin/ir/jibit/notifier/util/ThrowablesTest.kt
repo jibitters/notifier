@@ -15,8 +15,8 @@ internal class ThrowablesTest {
 
     @ParameterizedTest
     @MethodSource("provideExceptions")
-    fun `stacktrace -- Given an Exception -- Should Return the Expected Stacktrace`(ex: Exception?, expected: String) {
-        assertThat(ex.stackTrace()).contains(expected)
+    fun `stacktrace -- Given an Exception -- Should Return the Expected Stacktrace`(e: Exception?, expected: String) {
+        assertThat(e.stackTrace()).contains(expected)
     }
 
     companion object {
