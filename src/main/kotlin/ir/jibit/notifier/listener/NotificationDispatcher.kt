@@ -45,13 +45,23 @@ class NotificationDispatcher(@Autowired(required = false) private val notifiers:
     private val ioScope = CoroutineScope(ioExecutor.asCoroutineDispatcher())
 
     /**
-     * Simply submits the incoming request to the executor and returns immediately.
+     * Simply submits the incoming request to the executor and returns immediately. Also, records
+     * the amount of time took us to submit the new notification request.
      */
     fun dispatch(message: ByteArray) {
+        val timer = Timer.start(meterRegistry)
+
         ioScope.launch {
             meterRegistry.counter("notifier.notifications.received").increment()
             message.process()
         }
+
+        val submittedMetric = Timer
+            .builder("notifier.notifications.submitted")
+            .publishPercentileHistogram()
+            .publishPercentiles(0.5, 0.75, 0.90, 0.95, 0.99)
+            .register(meterRegistry)
+        timer.stop(submittedMetric)
     }
 
     /**

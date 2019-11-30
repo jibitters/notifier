@@ -82,10 +82,16 @@ internal class NotificationDispatcherIT {
 
         val received = receivedCounter()
         val handled = handledTimer("failed", "InvalidProtocolBufferException")
+        val submitted = submittedTimer()
+
         assertThat(received.count()).isOne()
         assertThat(handled.count()).isOne()
         assertThat(handled.measure()).isNotEmpty
         assertThat(handled.takeSnapshot().percentileValues().map { it.percentile() })
+            .containsExactlyInAnyOrder(0.5, 0.75, 0.9, 0.95, 0.99)
+        assertThat(submitted.count()).isOne()
+        assertThat(submitted.measure()).isNotEmpty
+        assertThat(submitted.takeSnapshot().percentileValues().map { it.percentile() })
             .containsExactlyInAnyOrder(0.5, 0.75, 0.9, 0.95, 0.99)
     }
 
@@ -99,10 +105,16 @@ internal class NotificationDispatcherIT {
 
         val received = receivedCounter()
         val handled = handledTimer("failed", "InvalidNotificationType")
+        val submitted = submittedTimer()
+
         assertThat(received.count()).isOne()
         assertThat(handled.count()).isOne()
         assertThat(handled.measure()).isNotEmpty
         assertThat(handled.takeSnapshot().percentileValues().map { it.percentile() })
+            .containsExactlyInAnyOrder(0.5, 0.75, 0.9, 0.95, 0.99)
+        assertThat(submitted.count()).isOne()
+        assertThat(submitted.measure()).isNotEmpty
+        assertThat(submitted.takeSnapshot().percentileValues().map { it.percentile() })
             .containsExactlyInAnyOrder(0.5, 0.75, 0.9, 0.95, 0.99)
     }
 
@@ -119,10 +131,16 @@ internal class NotificationDispatcherIT {
 
         val received = receivedCounter()
         val handled = handledTimer("failed", "NoNotificationHandler")
+        val submitted = submittedTimer()
+
         assertThat(received.count()).isOne()
         assertThat(handled.count()).isOne()
         assertThat(handled.measure()).isNotEmpty
         assertThat(handled.takeSnapshot().percentileValues().map { it.percentile() })
+            .containsExactlyInAnyOrder(0.5, 0.75, 0.9, 0.95, 0.99)
+        assertThat(submitted.count()).isOne()
+        assertThat(submitted.measure()).isNotEmpty
+        assertThat(submitted.takeSnapshot().percentileValues().map { it.percentile() })
             .containsExactlyInAnyOrder(0.5, 0.75, 0.9, 0.95, 0.99)
     }
 
@@ -152,10 +170,16 @@ internal class NotificationDispatcherIT {
 
         val received = receivedCounter()
         val handled = handledTimer("failed", expected)
+        val submitted = submittedTimer()
+
         assertThat(received.count()).isOne()
         assertThat(handled.count()).isOne()
         assertThat(handled.measure()).isNotEmpty
         assertThat(handled.takeSnapshot().percentileValues().map { it.percentile() })
+            .containsExactlyInAnyOrder(0.5, 0.75, 0.9, 0.95, 0.99)
+        assertThat(submitted.count()).isOne()
+        assertThat(submitted.measure()).isNotEmpty
+        assertThat(submitted.takeSnapshot().percentileValues().map { it.percentile() })
             .containsExactlyInAnyOrder(0.5, 0.75, 0.9, 0.95, 0.99)
     }
 
@@ -185,10 +209,16 @@ internal class NotificationDispatcherIT {
 
         val received = receivedCounter()
         val handled = handledTimer()
+        val submitted = submittedTimer()
+
         assertThat(received.count()).isOne()
         assertThat(handled.count()).isOne()
         assertThat(handled.measure()).isNotEmpty
         assertThat(handled.takeSnapshot().percentileValues().map { it.percentile() })
+            .containsExactlyInAnyOrder(0.5, 0.75, 0.9, 0.95, 0.99)
+        assertThat(submitted.count()).isOne()
+        assertThat(submitted.measure()).isNotEmpty
+        assertThat(submitted.takeSnapshot().percentileValues().map { it.percentile() })
             .containsExactlyInAnyOrder(0.5, 0.75, 0.9, 0.95, 0.99)
     }
 
@@ -196,6 +226,8 @@ internal class NotificationDispatcherIT {
 
     private fun handledTimer(status: String = "ok", exception: String = "none") =
         meterRegistry.get("notifier.notifications.handled").tag("status", status).tag("exception", exception).timer()
+
+    private fun submittedTimer() = meterRegistry.get("notifier.notifications.submitted").timer()
 
     private fun waitForConsumerToCatchUp() {
         Thread.sleep(1000)
