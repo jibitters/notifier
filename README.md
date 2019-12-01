@@ -45,6 +45,8 @@ connection.publish("notifier.notifications.sms", request.toByteArray())
 Both Nats and Protoc have clients for different languages. Therefore, you should be able to publish notification requests in your
 favorite platform as easily.
 
+Building the Application
+--------------------------
 #### Dependencies
 The main components of the Notifier are as following:
  - JVM: Since the application has been developed using [Kotlin](https://kotlinlang.org), you will need a JVM instance to 
@@ -61,7 +63,7 @@ Notifier is a typical maven based project, so you can simply use the bundled mav
  
 Then run the following command:
 ```bash
-./mvnw clean package -DskipTests -DskipITs
+./mvnw clean package -DskipTests
 ```
 This will generate a Jar package in the `target` directory.
 
@@ -75,8 +77,39 @@ like:
 java -jar target/notifier-*.jar --nats.servers="localhost:4222"
 ```
 
-#### Deployment
-TODO
+Deployment
+----------
+Notifier is a typical Spring Boot application. Similar to other Boot projects, Notifier provides a great deal of choice 
+when it comes to deploying your application. Here we're going to evaluate two of those approaches but for more detailed
+discussions, it's highly recommended to read the Spring Boot [documentation](https://docs.spring.io/spring-boot/docs/2.2.1.RELEASE/reference/html/deployment.html).
+
+#### Container-Friendly Environments
+With every successful build, we push the latest Docker Image to our public repository on [Docker Hub](https://hub.docker.com/r/jibitters/notifier).
+you can simply grab that image and use it to deploy Notifier to your container-friendly environment. In its simplest form,
+it's possible to start a new container just by:
+```bash
+docker run --name notifier -d -p8080:8080 jibitters/notifier:<version> --nats.servers="nats://localhost:4222"
+```
+It's also possible to configure the application via environment variables:
+```bash
+docker run --name notifier -d -p8080:8080 -e "NATS_SERVERS=nats://localhost:4222" jibitters/notifier:<version>
+```
+#### Linux Services
+It's perfectly fine to run Notifier as a service in your production machines directly. For example, you can define a
+simple Systemd service unit like following:
+```bash
+[Unit]
+Description=Notifier
+After=syslog.target
+
+[Service]
+User=someuser
+ExecStart=/path/to/notifier.jar
+
+[Install]
+WantedBy=multi-user.target
+```
+Moreover, Notifier can be installed as a [service](https://docs.spring.io/spring-boot/docs/2.2.1.RELEASE/reference/html/deployment.html#deployment-install) in different operating systems.
 
 Architecture
 -------------
