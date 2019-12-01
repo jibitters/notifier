@@ -14,7 +14,13 @@ jobs:
       - run: unzip protoc.zip && sudo cp ./bin/protoc /usr/bin/protoc
       - run: ./mvnw clean verify sonar:sonar -Dsonar.projectKey=jibitters_notifier -Dsonar.organization=jibitters -Dsonar.host.url=https://sonarcloud.io -B
       - run: bash <(curl -s https://codecov.io/bash)
-
+      - run:
+          name: Build & Push Docker Image
+          command: |
+            export TAG=$(ls target | grep -ohE '\d+.\d+.\d+(-SNAPSHOT)?' | head -1)
+            docker build -t jibitters/notifier:$TAG .
+            echo $DOCKER_PWD | docker login -u $DOCKER_LOGIN --password-stdin
+            docker push jibitters/notifier:$TAG
 workflows:
   main:
     jobs:
