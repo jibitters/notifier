@@ -24,6 +24,27 @@ After a few moments, two main components of the notifier would be available as f
 
 Notifier picks up any notification request published into the `notifier.notifications.*` subjects (e.g. `notifier.notifications.sms`)
 and tries to process them according to the notification type.
+
+#### Publishing Notifications
+In order to publish notification requests to the Notifier, we should generate the necessary stubs using the Protobuf 
+specifications residing the [`src/main/proto`](src/main/proto) directory. 
+For example, here's how we can create a notification request in Kotlin:
+```kotlin
+val request = NotificationRequest.newBuilder()
+        .setNotificationType(SMS)
+        .setMessage("Hello from Notifier")
+        .addRecipient("09124242424")
+        .build()
+```
+Then we can use the Nats client to publish the request:
+```kotlin
+val connection = Nats.connect("nats://localhost:4222")
+// first argument is the topic name and second one is the notification request
+connection.publish("notifier.notifications.sms", request.toByteArray())
+```
+Both Nats and Protoc have clients for different languages. Therefore, you should be able to publish notification requests in your
+favorite platform as easily.
+
 #### Dependencies
 The main components of the Notifier are as following:
  - JVM: Since the application has been developed using [Kotlin](https://kotlinlang.org), you will need a JVM instance to 
@@ -53,26 +74,6 @@ like:
 ```bash
 java -jar target/notifier-*.jar --nats.servers="localhost:4222"
 ```
-
-#### Publishing Notifications
-In order to publish notification requests to the Notifier, we should generate the necessary stubs using the Protobuf 
-specifications residing the [`src/main/proto`](src/main/proto) directory. 
-For example, here's how we can create a notification request in Kotlin:
-```kotlin
-val request = NotificationRequest.newBuilder()
-        .setNotificationType(SMS)
-        .setMessage("Hello from Notifier")
-        .addRecipient("09124242424")
-        .build()
-```
-Then we can use the Nats client to publish the request:
-```kotlin
-val connection = Nats.connect("nats://localhost:4222")
-// first argument is the topic name and second one is the notification request
-connection.publish("notifier.notifications.sms", request.toByteArray())
-```
-Both Nats and Protoc have clients for different languages. Therefore, you should be able to publish notification requests in your
-favorite platform as easily.
 
 #### Deployment
 TODO
