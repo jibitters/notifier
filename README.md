@@ -10,10 +10,24 @@
 
 Getting Started
 ----------------
+#### Docker Compose
+Just run the following command:
+```bash
+docker-compose up
+```
+After a few moments, two main components of the notifier would be available as following:
+
+| Component 	|    Container Name    	|      Port     	|                   Exec?                   	|
+|:---------:	|:--------------------:	|:-------------:	|:-----------------------------------------:	|
+|  Notifier 	| `notifier` 	| `1984 (http)` 	| `docker exec -it notifier_processor bash` 	|
+|    Nats   	|    `nats`   	|  `4222 (tcp)` 	|    -   	|
+
+Notifier picks up any notification request published into the `notifier.notifications.*` subjects (e.g. `notifier.notifications.sms`)
+and tries to process them according to the notification type.
 #### Dependencies
 The main components of the Notifier are as following:
  - JVM: Since the application has been developed using [Kotlin](https://kotlinlang.org), you will need a JVM instance to 
-   run the application.
+   run the application (Java 8+).
  - Nats: [Nats](https://nats.io) handles the messaging part. Each notification request should be published into a Nats 
    topic.
  - Protocol Buffer Compiler: All published messages should be serialized with [Protobuf](https://developers.google.com/protocol-buffers).

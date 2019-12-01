@@ -2,6 +2,7 @@ version: "3.7"
 services:
   nats:
     image: nats:2.1.0-scratch
+    container_name: nats
     ports:
       - 4222:4222
       - 6222:6222
@@ -9,5 +10,8 @@ services:
   notifier:
     image: jibitters/notifier:0.0.1-SNAPSHOT
     command: --nats.servers="nats://nats:4222"
+    container_name: notifier
+    ports:
+      - 1984:8080
     depends_on:
       - nats
