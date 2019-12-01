@@ -14,6 +14,7 @@ jobs:
       - run: unzip protoc.zip && sudo cp ./bin/protoc /usr/bin/protoc
       - run: ./mvnw clean verify sonar:sonar -Dsonar.projectKey=jibitters_notifier -Dsonar.organization=jibitters -Dsonar.host.url=https://sonarcloud.io -B
       - run: bash <(curl -s https://codecov.io/bash)
+      - setup_remote_docker
       - run:
           name: Build & Push Docker Image
           command: |
