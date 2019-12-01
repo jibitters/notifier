@@ -17,9 +17,7 @@ jobs:
       - run:
           name: Build & Push Docker Image
           command: |
-            export TAG=$(ls target | grep -ohE '\d+.\d+.\d+(-SNAPSHOT)?' | head -1)
-            echo $TAG
-            ls target
+            export TAG=$(./mvnw -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
             docker build -t jibitters/notifier:$TAG .
             echo $DOCKER_PWD | docker login -u $DOCKER_LOGIN --password-stdin
             docker push jibitters/notifier:$TAG
