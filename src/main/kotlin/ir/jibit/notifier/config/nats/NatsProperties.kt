@@ -22,11 +22,6 @@ class NatsProperties(
     val servers: Set<String>? = null,
 
     /**
-     * Determines the core pool size of the thread pool executor response for receiving messages.
-     */
-    val poolSize: Int = Runtime.getRuntime().availableProcessors(),
-
-    /**
      * The NATS topic to listen to.
      */
     val subject: String = "notifier.notifications.*",
