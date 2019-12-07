@@ -9,9 +9,7 @@ import ir.jibit.notifier.util.logger
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import java.util.concurrent.LinkedBlockingQueue
-import java.util.concurrent.ThreadPoolExecutor
-import java.util.concurrent.TimeUnit.MILLISECONDS
+import java.util.concurrent.Executors
 import javax.annotation.PreDestroy
 
 /**
@@ -40,12 +38,9 @@ class NatsConfiguration {
      */
     @Bean
     fun createConnection(properties: NatsProperties, dispatcher: NotificationDispatcher): Connection {
-        val loopExecutor = ThreadPoolExecutor(properties.poolSize, properties.poolSize, 0, MILLISECONDS,
-            LinkedBlockingQueue(), PrefixedThreadFactory(properties.threadPrefix))
-
         val options = Options.Builder()
             .servers(properties.servers!!.toTypedArray())
-            .executor(loopExecutor)
+            .executor(Executors.newCachedThreadPool(PrefixedThreadFactory(properties.threadPrefix)))
             .build()
 
         connection = Nats.connect(options)
