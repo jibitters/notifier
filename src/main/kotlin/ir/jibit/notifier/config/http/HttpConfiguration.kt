@@ -22,6 +22,7 @@ class HttpConfiguration {
     @Bean
     fun httpClient(properties: HttpProperties, ioDispatcher: ExecutorService): OkHttpClient = OkHttpClient.Builder()
         .dispatcher(Dispatcher(ioDispatcher))
+        .retryOnConnectionFailure(false)
         .callTimeout(properties.callTimeout)
         .connectTimeout(properties.connectTimeout)
         .readTimeout(properties.readTimeout).build()
