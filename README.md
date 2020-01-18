@@ -126,15 +126,59 @@ As you can spot from the picture, each incoming notification request would have 
  - Being picked up by a **Notification Listener**. Notification listeners are using a dedicated thread-pool to receive the requests and route them to appropriate notification handlers.
  - Being processed by a dedicated **Notification Handler**. Each handler can process a particular type of notification, e.g. SMS, and can be scaled independently of other handlers. Handlers are backed by another thread-pool well-suited for IO operations.
 
-Notification Providers
-----------------------
-#### SMS Provider 
-#### Call Provider
-#### Push Notification Provider
-#### Email Provider
-
 Configuration Management
 ------------------------
+It's possible to configure different aspects of the Notifier with custom configuration through system properties or environment
+variables.
+#### NATS Configuration
+Currently it's possible to configure the NATS configurations in the following ways:
+ - (Required) `nats.servers` system property, `NATS_SERVERS` environment variable or `--nats.servers` command line option can configure
+ the collection of NATS servers we're going to get connected to.
+ - (Optional) `nats.subject` system property, `NATS_SUBJECT` env variable or `--nats-subject` command line options determines the NATS
+ subject we're going to subscribe to. The default value is `notifier.notifications.*`. So any notification request published to
+ all variants of `notifier.notifications`, e.g. `notifier.notifications.sms` or `notifier.notifications.email` will be processed
+ by us. It's possible to configure different Notifier instances to listen to different subjects. This way we can dedicate
+ each instance to process only one or more notification types.
+ - (Optional) `nats.thread-prefix` system property, `NATS_THREAD_PREFIX` env variable or `--nats.thread-prefix` represents our
+ thread prefix for the event loop. The default is `notifier-loop`.
+
+#### HTTP Configuration
+In order to process some notification types, we may need to call an external backend service exposing a RPC API over HTTP. With
+the following set of configurations, we can configure the HTTP client.
+ - (Optional) `http.call-timeout` system property, `HTTP_CALL_TIMEOUT` env variable or `--http.call-timeout` command line option
+ with the `<number><unit>` format (e.g. `1s`, `2m`, `3h`) would configure the call timeout for the HTTP client. The default is 
+ one second or `1s`.
+ - (Optional) `http.read-timeout` system property, `HTTP_READ_TIMEOUT` env variable or `--http.read-timeout` command line option
+  with the `<number><unit>` format (e.g. `1s`, `2m`, `3h`) would configure the read timeout for the HTTP client. The default is 
+  one second or `1s`.
+ - (Optional) `http.connect-timeout` system property, `HTTP_CONNECT_TIMEOUT` env variable or `--http.connect-timeout` command line option
+   with the `<number><unit>` format (e.g. `1s`, `2m`, `3h`) would configure the connection timeout for the HTTP client. The default is 
+   one second or `1s`.
+
+#### IO Thread Pool Configuration
+We're launching coroutines backed by a `ThreadPoolExecutor`-based `ExecutorService`. It's possible to configure the configurations
+related to this thread-pool as following:
+ - (Optional) The `io-dispatcher.pool-size` system property, `IO_DISPATCHER_POOL_SIZE` environment variable or `--io-dispatcher.pool-size`
+ command line option determines the thread pool sie. By default, it's twice the number of CPU cores.
+ - (Optional) The `io-dispatcher.thread-prefix` system property, the `IO_DISPATCHER_THREAD_PREFIX` env variable or `--io-dispatcher.thread-prefix`
+ command line option determines the thread prefix for our IO thread pool. The default value is `notifier-io`.
+
+#### Email Configuration
+The email provider by default is disabled. In order to configure the Email sender, you can use the standard configuration
+properties provided by [spring Boot](https://docs.spring.io/spring-boot/docs/2.2.3.RELEASE/reference/html/appendix-application-properties.html#mail-properties).
+
+#### SMS and Call Configuration
+Currently, we only support Kavehnegar as our SMS and CALL provider implementation. By default the provider is disabled. In order
+to enable this provider, just set the `sms-providers.use` system property (`SMS_PROVIDERS_USE` or `--sms-providers.use`) to the 
+`kavehnegar` literal value.
+
+When the Kavehnegar provider is active, you should provide the following configuration properties, too:
+ - (Required) `sms-providers.kavehnegar.token`, `SMS_PROVIDERS_KAVEHNEGAR_TOKEN` or `--sms-providers.kavehnegar.token` should be equal to
+ the your Kavehnegar token.
+ - (Optional) `sms-providers.kavehnegar.base-url`, `SMS_PROVIDERS_KAVEHNEGAR_BASE_URL` or `--sms-providers.kavehnegar.base-url` represents the
+ Kavehnegar's API Base URL. The default value is `http://api.kavenegar.com/`.
+ - (Required) `sms-providers.kavehnegar.sender`, `SMS_PROVIDERS_KAVEHNEGAR_SENDER` or `--sms-providers.kavehnegar.sender` represents
+ the sender number provided by Kavehnegar.
 
 Metrics
 --------
@@ -165,7 +209,7 @@ Additionally, the metric results can be filtered by the following tags:
 
 License
 --------
-Copyright 2018 Jibitters
+Copyright 2020 Jibitters
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
