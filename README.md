@@ -187,7 +187,7 @@ Each time notifier receives a new notification request, in increments the `notif
 of the `notifier.notifications.received` key, we can measure how many requests we received so far.
 
 #### Notification Queue Time
-After receiving a new notification request, we would launch a new coroutine to handle that request. The `notifier.notifications.submitted` timer metric
+After receiving a new notification request, we would launch a new async task to handle that request. The `notifier.notifications.submitted` timer metric
 shows how much time we took to queue this new request. This timer also exposes 50th, 75th, 90th, 95th and 99th percentiles, so we can easily see different
 time distributions.
 
