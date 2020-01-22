@@ -1,5 +1,3 @@
-@file:Suppress("ProtectedInFinal")
-
 package ir.jibit.notifier.config.nats
 
 import com.nhaarman.mockitokotlin2.mock
@@ -43,6 +41,7 @@ internal class NatsConfigurationIT {
     /**
      * Test configuration.
      */
+    @Suppress("ProtectedInFinal")
     @EnableConfigurationProperties(NatsProperties::class)
     protected class NatsConfigurationITTestConfig {
 

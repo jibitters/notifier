@@ -1,9 +1,7 @@
-@file:Suppress("ProtectedInFinal")
-
 package ir.jibit.notifier.provider.mail
 
+import ir.jibit.notifier.config.dispatcher.IoDispatcher
 import ir.jibit.notifier.provider.FailedNotification
-import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -38,19 +36,18 @@ internal class FailingMailNotifierIT {
 
     @Test
     fun `When We Fail to Send the Notification, We Should Send a FailedNotification`() {
-        runBlocking {
-            val response = notifier.notify(MailNotification("Subject", "Message", recipients = setOf("0912xxx")))
-            assertThat(response).isInstanceOf(FailedNotification::class.java)
-            response as FailedNotification
-            assertThat(response.exception).isInstanceOf(MailSendException::class.java)
-        }
+        val response = notifier.notify(MailNotification("Subject", "Message", recipients = setOf("0912xxx"))).join()
+        assertThat(response).isInstanceOf(FailedNotification::class.java)
+        response as FailedNotification
+        assertThat(response.exception).hasCauseInstanceOf(MailSendException::class.java)
     }
 
     /**
      * A simple test configuration to pickup the required notifiers.
      */
     @TestConfiguration
-    @ComponentScan(basePackageClasses = [MailNotifier::class])
+    @Suppress("ProtectedInFinal")
     @ImportAutoConfiguration(MailSenderAutoConfiguration::class)
+    @ComponentScan(basePackageClasses = [MailNotifier::class, IoDispatcher::class])
     protected class FailingMailNotifierITConfig
 }

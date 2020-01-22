@@ -1,5 +1,3 @@
-@file:Suppress("ProtectedInFinal")
-
 package ir.jibit.notifier.provider.sms.kavehnegar
 
 import ir.jibit.notifier.config.dispatcher.IoDispatcher
@@ -45,6 +43,7 @@ internal class KavehnegarNotifierContextIT {
      * A simple test configuration to pickup the required notifiers.
      */
     @TestConfiguration
+    @Suppress("ProtectedInFinal")
     @ComponentScan(basePackageClasses = [KavehnegarNotifier::class, HttpConfiguration::class, IoDispatcher::class])
     protected class KavehnegarNotifierContextITConfig
 }

@@ -1,12 +1,10 @@
-@file:Suppress("ProtectedInFinal")
-
 package ir.jibit.notifier.provider.mail
 
 import ir.jibit.notifier.MailExtension
+import ir.jibit.notifier.config.dispatcher.IoDispatcher
 import ir.jibit.notifier.provider.FailedNotification
 import ir.jibit.notifier.provider.Notification
 import ir.jibit.notifier.provider.SuccessfulNotification
-import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
@@ -51,40 +49,35 @@ internal class MailNotifierIT {
     @ParameterizedTest
     @MethodSource("provideInvalidMails")
     fun `Given Invalid Mails, It Should Return FailedNotification`(notification: Notification, expected: String) {
-        runBlocking {
-            val response = notifier.notify(notification)
-            assertThat(response).isInstanceOf(FailedNotification::class.java)
-            response as FailedNotification
-            assertThat(response.log).isEqualTo(expected)
-        }
+        val response = notifier.notify(notification).join()
+        assertThat(response).isInstanceOf(FailedNotification::class.java)
+        response as FailedNotification
+        assertThat(response.log).isEqualTo(expected)
     }
 
     @Test
     fun `Given Invalid Type, Should Throw Exception`() {
-        assertThatThrownBy {
-            runBlocking {
-                notifier.notify(UnsupportedNotification)
-            }
-        }.isInstanceOf(ClassCastException::class.java)
+        assertThatThrownBy { notifier.notify(UnsupportedNotification).join() }
+            .isInstanceOf(ClassCastException::class.java)
     }
 
     @ParameterizedTest
     @MethodSource("provideNotificationsToSend")
     fun `Given Valid Notifications, It Should Be Able To Actually Send Them`(notification: Notification) {
-        runBlocking {
-            assertThat(notifier.notify(notification)).isInstanceOf(SuccessfulNotification::class.java)
-        }
+        assertThat(notifier.notify(notification).join()).isInstanceOf(SuccessfulNotification::class.java)
     }
 
     companion object {
 
         @JvmStatic
+        @Suppress("unused")
         fun provideNotifications() = listOf(
             arguments(MailNotification("", "", setOf()), true),
             arguments(UnsupportedNotification, false)
         )
 
         @JvmStatic
+        @Suppress("unused")
         fun provideInvalidMails() = listOf(
             arguments(MailNotification("", "", emptySet()), "Email should have at least one recipient"),
             arguments(MailNotification("", "", setOf("")), "Email should have a valid subject"),
@@ -94,6 +87,7 @@ internal class MailNotifierIT {
         )
 
         @JvmStatic
+        @Suppress("unused")
         fun provideNotificationsToSend() = listOf(
             arguments(MailNotification("Subject", "Message", setOf("a@g.com", "b@g.com"))),
             arguments(MailNotification("Subject", "Message", setOf("a@g.com"), "me")),
@@ -106,8 +100,9 @@ internal class MailNotifierIT {
      * A simple test configuration to pickup the required notifiers.
      */
     @TestConfiguration
-    @ComponentScan(basePackageClasses = [MailNotifier::class])
+    @Suppress("ProtectedInFinal")
     @ImportAutoConfiguration(MailSenderAutoConfiguration::class)
+    @ComponentScan(basePackageClasses = [MailNotifier::class, IoDispatcher::class])
     protected class MailNotifierITConfig
 
     /**
