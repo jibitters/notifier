@@ -145,15 +145,9 @@ Currently it's possible to configure the NATS configurations in the following wa
 #### HTTP Configuration
 In order to process some notification types, we may need to call an external backend service exposing a RPC API over HTTP. With
 the following set of configurations, we can configure the HTTP client.
- - (Optional) `http.call-timeout` system property, `HTTP_CALL_TIMEOUT` env variable or `--http.call-timeout` command line option
- with the `<number><unit>` format (e.g. `1s`, `2m`, `3h`) would configure the call timeout for the HTTP client. The default is 
+ - (Optional) `http.timeout` system property, `HTTP_TIMEOUT` env variable or `--http.timeout` command line option
+ with the `<number><unit>` format (e.g. `1s`, `2m`, `3h`) would configure the timeout for the HTTP client. The default is 
  one second or `1s`.
- - (Optional) `http.read-timeout` system property, `HTTP_READ_TIMEOUT` env variable or `--http.read-timeout` command line option
-  with the `<number><unit>` format (e.g. `1s`, `2m`, `3h`) would configure the read timeout for the HTTP client. The default is 
-  one second or `1s`.
- - (Optional) `http.connect-timeout` system property, `HTTP_CONNECT_TIMEOUT` env variable or `--http.connect-timeout` command line option
-   with the `<number><unit>` format (e.g. `1s`, `2m`, `3h`) would configure the connection timeout for the HTTP client. The default is 
-   one second or `1s`.
 
 #### IO Thread Pool Configuration
 We're launching coroutines backed by a `ThreadPoolExecutor`-based `ExecutorService`. It's possible to configure the configurations
