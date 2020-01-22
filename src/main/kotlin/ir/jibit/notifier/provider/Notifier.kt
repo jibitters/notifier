@@ -1,5 +1,7 @@
 package ir.jibit.notifier.provider
 
+import java.util.concurrent.CompletableFuture
+
 /**
  * Defines a contract to handle notifications. The [notify] should be used iff
  * the call to [canNotify] for the same notification returns true.
@@ -19,5 +21,5 @@ interface Notifier {
      * exceptions and communicate the function result through an appropriate implementation of
      * [NotificationResponse].
      */
-    suspend fun notify(notification: Notification): NotificationResponse
+    fun notify(notification: Notification): CompletableFuture<NotificationResponse>
 }

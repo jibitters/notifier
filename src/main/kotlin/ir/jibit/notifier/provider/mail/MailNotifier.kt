@@ -1,10 +1,18 @@
 package ir.jibit.notifier.provider.mail
 
-import ir.jibit.notifier.provider.*
+import ir.jibit.notifier.provider.FailedNotification
+import ir.jibit.notifier.provider.Notification
+import ir.jibit.notifier.provider.NotificationResponse
+import ir.jibit.notifier.provider.Notifier
+import ir.jibit.notifier.provider.SuccessfulNotification
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.mail.SimpleMailMessage
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.stereotype.Component
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.completedFuture
+import java.util.concurrent.CompletableFuture.runAsync
+import java.util.concurrent.ExecutorService
 
 /**
  * Responsible for processing mail notification requests. This implementation will be registered
@@ -12,12 +20,13 @@ import org.springframework.stereotype.Component
  * bean, you should configure notifier with `spring.mail.*` configuration properties.
  *
  * @param mailSender Is responsible for sending emails.
+ * @param ioDispatcher Would be used to submit mail request asynchronously.
  *
  * @author Ali Dehghani
  */
 @Component
 @ConditionalOnProperty(prefix = "spring.mail", name = ["host"])
-class MailNotifier(private val mailSender: JavaMailSender) : Notifier {
+class MailNotifier(private val mailSender: JavaMailSender, val ioDispatcher: ExecutorService) : Notifier {
 
     /**
      * Can only handle [MailNotification] requests.
@@ -27,17 +36,16 @@ class MailNotifier(private val mailSender: JavaMailSender) : Notifier {
     /**
      * Validates the given notification and sends it to the destined recipients.
      */
-    override suspend fun notify(notification: Notification): NotificationResponse {
+    override fun notify(notification: Notification): CompletableFuture<NotificationResponse> {
         notification as MailNotification
         val failed = notification.validate()
-        if (failed != null) return failed
+        if (failed != null) return completedFuture(failed)
 
-        return try {
-            mailSender.send(notification.toMail())
-            SuccessfulNotification()
-        } catch (e: Exception) {
-            FailedNotification(exception = e)
-        }
+        return runAsync(Runnable { mailSender.send(notification.toMail()) }, ioDispatcher)
+            .handle { _, exception ->
+                if (exception != null) FailedNotification(exception = exception)
+                else SuccessfulNotification()
+            }
     }
 
     /**

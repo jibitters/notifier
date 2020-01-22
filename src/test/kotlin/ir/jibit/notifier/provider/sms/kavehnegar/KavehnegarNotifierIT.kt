@@ -1,8 +1,10 @@
-@file:Suppress("ProtectedInFinal")
-
 package ir.jibit.notifier.provider.sms.kavehnegar
 
-import com.github.tomakehurst.wiremock.client.WireMock.*
+import com.github.tomakehurst.wiremock.client.WireMock.aResponse
+import com.github.tomakehurst.wiremock.client.WireMock.ok
+import com.github.tomakehurst.wiremock.client.WireMock.post
+import com.github.tomakehurst.wiremock.client.WireMock.status
+import com.github.tomakehurst.wiremock.client.WireMock.stubFor
 import com.github.tomakehurst.wiremock.http.Fault.MALFORMED_RESPONSE_CHUNK
 import ir.jibit.notifier.WireMockExtension
 import ir.jibit.notifier.config.dispatcher.IoDispatcher
@@ -12,11 +14,11 @@ import ir.jibit.notifier.provider.Notification
 import ir.jibit.notifier.provider.SuccessfulNotification
 import ir.jibit.notifier.provider.sms.CallNotification
 import ir.jibit.notifier.provider.sms.SmsNotification
-import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.beans.factory.annotation.Autowired
@@ -27,6 +29,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.io.IOException
+import java.net.http.HttpTimeoutException
 import java.util.stream.Stream
 
 /**
@@ -53,13 +56,11 @@ internal class KavehnegarNotifierIT {
 
     @Test
     fun `Invalid Notification -- Should Return FailedNotification`() {
-        runBlocking {
-            val response = notifier.notify(UnsupportedNotification)
-            assertThat(response).isInstanceOf(FailedNotification::class.java)
-            response as FailedNotification
-            assertThat(response.exception).isNull()
-            assertThat(response.log).isEqualTo("The UnsupportedNotification is not supported")
-        }
+        val response = notifier.notify(UnsupportedNotification).join()
+        assertThat(response).isInstanceOf(FailedNotification::class.java)
+        response as FailedNotification
+        assertThat(response.exception).isNull()
+        assertThat(response.log).isEqualTo("The UnsupportedNotification is not supported")
     }
 
     @Test
@@ -69,13 +70,11 @@ internal class KavehnegarNotifierIT {
         stubFor(post(url).willReturn(ok(apiResponse)))
 
         val sms = SmsNotification("message", setOf("09129129123"))
-        runBlocking {
-            val response = notifier.notify(sms)
+        val response = notifier.notify(sms).join()
 
-            assertThat(response).isInstanceOf(SuccessfulNotification::class.java)
-            response as SuccessfulNotification
-            assertThat(response.log).isEqualTo(apiResponse)
-        }
+        assertThat(response).isInstanceOf(SuccessfulNotification::class.java)
+        response as SuccessfulNotification
+        assertThat(response.log).isEqualTo(apiResponse)
     }
 
     @Test
@@ -85,14 +84,12 @@ internal class KavehnegarNotifierIT {
         stubFor(post(url).willReturn(status(412).withBody(apiResponse)))
 
         val sms = SmsNotification("message", setOf("09129129123"))
-        runBlocking {
-            val response = notifier.notify(sms)
+        val response = notifier.notify(sms).join()
 
-            assertThat(response).isInstanceOf(FailedNotification::class.java)
-            response as FailedNotification
-            assertThat(response.log).isEqualTo(apiResponse)
-            assertThat(response.exception).isNull()
-        }
+        assertThat(response).isInstanceOf(FailedNotification::class.java)
+        response as FailedNotification
+        assertThat(response.log).isEqualTo(apiResponse)
+        assertThat(response.exception).isNull()
     }
 
     @Test
@@ -101,14 +98,12 @@ internal class KavehnegarNotifierIT {
         stubFor(post(url).willReturn(aResponse().withFault(MALFORMED_RESPONSE_CHUNK)))
 
         val sms = SmsNotification("message", setOf("09129129123"))
-        runBlocking {
-            val response = notifier.notify(sms)
+        val response = notifier.notify(sms).join()
 
-            assertThat(response).isInstanceOf(FailedNotification::class.java)
-            response as FailedNotification
-            assertThat(response.log).isNull()
-            assertThat(response.exception).isInstanceOf(IOException::class.java)
-        }
+        assertThat(response).isInstanceOf(FailedNotification::class.java)
+        response as FailedNotification
+        assertThat(response.log).isNull()
+        assertThat(response.exception).hasCauseInstanceOf(IOException::class.java)
     }
 
     @Test
@@ -117,14 +112,12 @@ internal class KavehnegarNotifierIT {
         stubFor(post(url).willReturn(aResponse().withFixedDelay(2000).withBody("")))
 
         val sms = SmsNotification("message", setOf("09129129123"))
-        runBlocking {
-            val response = notifier.notify(sms)
+        val response = notifier.notify(sms).join()
 
-            assertThat(response).isInstanceOf(FailedNotification::class.java)
-            response as FailedNotification
-            assertThat(response.log).isNull()
-            assertThat(response.exception).isInstanceOf(IOException::class.java)
-        }
+        assertThat(response).isInstanceOf(FailedNotification::class.java)
+        response as FailedNotification
+        assertThat(response.log).isNull()
+        assertThat(response.exception).hasCauseInstanceOf(HttpTimeoutException::class.java)
     }
 
     @Test
@@ -134,13 +127,11 @@ internal class KavehnegarNotifierIT {
         stubFor(post(url).willReturn(ok(apiResponse)))
 
         val sms = CallNotification("message", setOf("09129129123"))
-        runBlocking {
-            val response = notifier.notify(sms)
+        val response = notifier.notify(sms).join()
 
-            assertThat(response).isInstanceOf(SuccessfulNotification::class.java)
-            response as SuccessfulNotification
-            assertThat(response.log).isEqualTo(apiResponse)
-        }
+        assertThat(response).isInstanceOf(SuccessfulNotification::class.java)
+        response as SuccessfulNotification
+        assertThat(response.log).isEqualTo(apiResponse)
     }
 
     @Test
@@ -150,14 +141,12 @@ internal class KavehnegarNotifierIT {
         stubFor(post(url).willReturn(status(412).withBody(apiResponse)))
 
         val sms = CallNotification("message", setOf("09129129123"))
-        runBlocking {
-            val response = notifier.notify(sms)
+        val response = notifier.notify(sms).join()
 
-            assertThat(response).isInstanceOf(FailedNotification::class.java)
-            response as FailedNotification
-            assertThat(response.log).isEqualTo(apiResponse)
-            assertThat(response.exception).isNull()
-        }
+        assertThat(response).isInstanceOf(FailedNotification::class.java)
+        response as FailedNotification
+        assertThat(response.log).isEqualTo(apiResponse)
+        assertThat(response.exception).isNull()
     }
 
     @Test
@@ -166,14 +155,12 @@ internal class KavehnegarNotifierIT {
         stubFor(post(url).willReturn(aResponse().withFault(MALFORMED_RESPONSE_CHUNK)))
 
         val sms = CallNotification("message", setOf("09129129123"))
-        runBlocking {
-            val response = notifier.notify(sms)
+        val response = notifier.notify(sms).join()
 
-            assertThat(response).isInstanceOf(FailedNotification::class.java)
-            response as FailedNotification
-            assertThat(response.log).isNull()
-            assertThat(response.exception).isInstanceOf(IOException::class.java)
-        }
+        assertThat(response).isInstanceOf(FailedNotification::class.java)
+        response as FailedNotification
+        assertThat(response.log).isNull()
+        assertThat(response.exception).hasCauseExactlyInstanceOf(IOException::class.java)
     }
 
     @Test
@@ -182,14 +169,12 @@ internal class KavehnegarNotifierIT {
         stubFor(post(url).willReturn(aResponse().withFixedDelay(2000).withBody("")))
 
         val sms = CallNotification("message", setOf("09129129123"))
-        runBlocking {
-            val response = notifier.notify(sms)
+        val response = notifier.notify(sms).join()
 
-            assertThat(response).isInstanceOf(FailedNotification::class.java)
-            response as FailedNotification
-            assertThat(response.log).isNull()
-            assertThat(response.exception).isInstanceOf(IOException::class.java)
-        }
+        assertThat(response).isInstanceOf(FailedNotification::class.java)
+        response as FailedNotification
+        assertThat(response.log).isNull()
+        assertThat(response.exception).hasCauseInstanceOf(HttpTimeoutException::class.java)
     }
 
     private fun successfulResponse() = """
@@ -226,7 +211,8 @@ internal class KavehnegarNotifierIT {
     companion object {
 
         @JvmStatic
-        fun provideNotifications() = Stream.of(
+        @Suppress("unused")
+        fun provideNotifications(): Stream<Arguments> = Stream.of(
             arguments(SmsNotification("", setOf()), true),
             arguments(CallNotification("", setOf()), true),
             arguments(UnsupportedNotification, false)
@@ -237,6 +223,7 @@ internal class KavehnegarNotifierIT {
      * A simple test configuration to pickup the required notifiers.
      */
     @TestConfiguration
+    @Suppress("ProtectedInFinal")
     @ComponentScan(basePackageClasses = [KavehnegarNotifier::class, HttpConfiguration::class, IoDispatcher::class])
     protected class KavehnegarNotifierITConfig
 

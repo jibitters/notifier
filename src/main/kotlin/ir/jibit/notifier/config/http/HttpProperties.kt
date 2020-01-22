@@ -14,17 +14,7 @@ import java.time.Duration
 class HttpProperties(
 
     /**
-     * Represents the HTTP call timeout in seconds.
-     */
-    val callTimeout: Duration = Duration.ofSeconds(1),
-
-    /**
      * Represents the HTTP connect timeout in seconds.
      */
-    val connectTimeout: Duration = Duration.ofSeconds(1),
-
-    /**
-     * Represents the HTTP read timeout in seconds.
-     */
-    val readTimeout: Duration = Duration.ofSeconds(1)
+    val timeout: Duration = Duration.ofSeconds(1)
 )

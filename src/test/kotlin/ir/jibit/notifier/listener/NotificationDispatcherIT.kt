@@ -1,19 +1,29 @@
-@file:Suppress("ProtectedInFinal")
-
 package ir.jibit.notifier.listener
 
-import com.nhaarman.mockitokotlin2.*
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.argumentCaptor
+import com.nhaarman.mockitokotlin2.atMost
+import com.nhaarman.mockitokotlin2.doReturn
+import com.nhaarman.mockitokotlin2.reset
+import com.nhaarman.mockitokotlin2.stub
+import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.verifyNoMoreInteractions
+import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import io.micrometer.core.instrument.MeterRegistry
 import io.nats.client.Connection
 import ir.jibit.notifier.NatsExtension
 import ir.jibit.notifier.provider.FailedNotification
+import ir.jibit.notifier.provider.NotificationResponse
 import ir.jibit.notifier.provider.Notifier
 import ir.jibit.notifier.provider.SuccessfulNotification
 import ir.jibit.notifier.provider.mail.MailNotification
 import ir.jibit.notifier.provider.sms.CallNotification
 import ir.jibit.notifier.provider.sms.SmsNotification
 import ir.jibit.notifier.stubs.Notification.NotificationRequest
-import ir.jibit.notifier.stubs.Notification.NotificationRequest.Type.*
+import ir.jibit.notifier.stubs.Notification.NotificationRequest.Type.CALL
+import ir.jibit.notifier.stubs.Notification.NotificationRequest.Type.EMAIL
+import ir.jibit.notifier.stubs.Notification.NotificationRequest.Type.INVALID
+import ir.jibit.notifier.stubs.Notification.NotificationRequest.Type.SMS
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -28,6 +38,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.TestPropertySource
+import java.util.concurrent.CompletableFuture.completedFuture
 
 /**
  * Integration tests for notification dispatching subsystem.
@@ -146,10 +157,10 @@ internal class NotificationDispatcherIT {
 
     @ParameterizedTest
     @MethodSource("provideFailedNotifications")
-    fun `Dispatch -- When Failed -- Should've Interacted with Providers`(f: FailedNotification, expected: String) {
+    fun `Dispatch -- When Failed -- Should've Interacted with Providers`(f: NotificationResponse, expected: String) {
         val captor = argumentCaptor<SmsNotification>()
         stub {
-            on { runBlocking { smsProvider.notify(captor.capture()) } } doReturn f
+            on { runBlocking { smsProvider.notify(captor.capture()) } } doReturn completedFuture(f)
         }
 
         val request = NotificationRequest.newBuilder()
@@ -188,7 +199,8 @@ internal class NotificationDispatcherIT {
     fun `Dispatch -- When Successful -- Should've Interacted with Providers`(log: String) {
         val captor = argumentCaptor<CallNotification>()
         stub {
-            on { runBlocking { callProvider.notify(captor.capture()) } } doReturn SuccessfulNotification(if (log.isBlank()) null else log)
+            val notification: NotificationResponse = SuccessfulNotification(if (log.isBlank()) null else log)
+            on { runBlocking { callProvider.notify(captor.capture()) } } doReturn completedFuture(notification)
         }
 
         val request = NotificationRequest.newBuilder()
@@ -237,6 +249,7 @@ internal class NotificationDispatcherIT {
     companion object {
 
         @JvmStatic
+        @Suppress("unused")
         fun provideFailedNotifications() = listOf(
             arguments(FailedNotification(exception = IllegalArgumentException(""), log = "failed"), "IllegalArgumentException"),
             arguments(FailedNotification(log = "failed"), "Unknown"),

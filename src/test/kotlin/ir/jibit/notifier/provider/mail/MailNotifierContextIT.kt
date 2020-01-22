@@ -1,5 +1,3 @@
-@file:Suppress("ProtectedInFinal")
-
 package ir.jibit.notifier.provider.mail
 
 import org.junit.jupiter.api.Test
@@ -39,6 +37,7 @@ internal class MailNotifierContextIT {
      * A simple test configuration to pickup the required notifiers.
      */
     @TestConfiguration
+    @Suppress("ProtectedInFinal")
     @ComponentScan(basePackageClasses = [MailNotifier::class])
     @ImportAutoConfiguration(MailSenderAutoConfiguration::class)
     protected class MailNotifierContextITConfig

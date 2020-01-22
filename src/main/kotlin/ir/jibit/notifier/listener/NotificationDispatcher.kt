@@ -14,9 +14,6 @@ import ir.jibit.notifier.stubs.Notification.NotificationRequest.Type.CALL
 import ir.jibit.notifier.stubs.Notification.NotificationRequest.Type.EMAIL
 import ir.jibit.notifier.stubs.Notification.NotificationRequest.Type.SMS
 import ir.jibit.notifier.util.logger
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.asCoroutineDispatcher
-import kotlinx.coroutines.launch
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import java.util.concurrent.ExecutorService
@@ -42,18 +39,13 @@ class NotificationDispatcher(@Autowired(required = false) private val notifiers:
     private val log = logger<NotificationDispatcher>()
 
     /**
-     * A [CoroutineScope] backed by the [ioExecutor].
-     */
-    private val ioScope = CoroutineScope(ioExecutor.asCoroutineDispatcher())
-
-    /**
      * Simply submits the incoming request to the executor and returns immediately. Also, records
      * the amount of time took us to submit the new notification request.
      */
     fun dispatch(message: ByteArray) {
         val timer = Timer.start(meterRegistry)
 
-        ioScope.launch {
+        ioExecutor.execute {
             meterRegistry.counter("notifier.notifications.received").increment()
             message.process()
         }
@@ -74,7 +66,7 @@ class NotificationDispatcher(@Autowired(required = false) private val notifiers:
      * All these operations can terminate successfully or exceptionally. Both situations are going
      * to be recorded as Micrometer metrics.
      */
-    private suspend fun ByteArray.process() {
+    private fun ByteArray.process() {
         val sample = Timer.start(meterRegistry)
         var notificationType = "invalid"
         try {
@@ -129,18 +121,25 @@ class NotificationDispatcher(@Autowired(required = false) private val notifiers:
     /**
      * Will use the receiving notifier to handle the notification.
      */
-    private suspend fun Notifier.handle(notification: Notification, notificationType: String, sample: Timer.Sample) {
-        when (val response = notify(notification)) {
-            is SuccessfulNotification -> {
-                sample.stop(handledMetric(type = notificationType))
-                log.debug("Successfully handled a notification: {}", response)
+    private fun Notifier.handle(notification: Notification, notificationType: String, sample: Timer.Sample) {
+        notify(notification)
+            .handle { ok, exception ->
+                if (exception != null) FailedNotification(exception = exception)
+                else ok
             }
-            is FailedNotification -> {
-                val reason = response.exception?.javaClass?.simpleName ?: "Unknown"
-                sample.stop(handledMetric("failed", reason, notificationType))
-                log.warn("Failed to deliver a notification: {}", response)
+            .thenAccept {
+                when (it) {
+                    is SuccessfulNotification -> {
+                        sample.stop(handledMetric(type = notificationType))
+                        log.debug("Successfully handled a notification: {}", it)
+                    }
+                    is FailedNotification -> {
+                        val reason = it.exception?.javaClass?.simpleName ?: "Unknown"
+                        sample.stop(handledMetric("failed", reason, notificationType))
+                        log.warn("Failed to deliver a notification: {}", it)
+                    }
+                }
             }
-        }
     }
 
     /**
@@ -162,7 +161,7 @@ class NotificationDispatcher(@Autowired(required = false) private val notifiers:
             .register(meterRegistry)
 
     /**
-     * Converts the receding Protocol Buffer stub to an appropriate instance of [Notification]. Returns
+     * Converts the receiving Protocol Buffer stub to an appropriate instance of [Notification]. Returns
      * `null` when the notification type is invalid.
      */
     private fun NotificationRequest.toNotification(): Notification? {
