@@ -24,7 +24,6 @@ import ir.jibit.notifier.stubs.Notification.NotificationRequest.Type.CALL
 import ir.jibit.notifier.stubs.Notification.NotificationRequest.Type.EMAIL
 import ir.jibit.notifier.stubs.Notification.NotificationRequest.Type.INVALID
 import ir.jibit.notifier.stubs.Notification.NotificationRequest.Type.SMS
-import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -160,7 +159,7 @@ internal class NotificationDispatcherIT {
     fun `Dispatch -- When Failed -- Should've Interacted with Providers`(f: NotificationResponse, expected: String) {
         val captor = argumentCaptor<SmsNotification>()
         stub {
-            on { runBlocking { smsProvider.notify(captor.capture()) } } doReturn completedFuture(f)
+            on { smsProvider.notify(captor.capture()) } doReturn completedFuture(f)
         }
 
         val request = NotificationRequest.newBuilder()
@@ -174,7 +173,7 @@ internal class NotificationDispatcherIT {
         verify(smsProvider).canNotify(any())
         verify(callProvider, atMost(1)).canNotify(any())
         verifyNoMoreInteractions(callProvider)
-        runBlocking { verify(smsProvider).notify(any()) }
+        verify(smsProvider).notify(any())
 
         assertThat(captor.firstValue.message).isEqualTo("Message")
         assertThat(captor.firstValue.recipients).contains("09121231234")
@@ -200,7 +199,7 @@ internal class NotificationDispatcherIT {
         val captor = argumentCaptor<CallNotification>()
         stub {
             val notification: NotificationResponse = SuccessfulNotification(if (log.isBlank()) null else log)
-            on { runBlocking { callProvider.notify(captor.capture()) } } doReturn completedFuture(notification)
+            on { callProvider.notify(captor.capture()) } doReturn completedFuture(notification)
         }
 
         val request = NotificationRequest.newBuilder()
@@ -214,7 +213,7 @@ internal class NotificationDispatcherIT {
         verify(callProvider).canNotify(any())
         verify(smsProvider, atMost(1)).canNotify(any())
         verifyNoMoreInteractions(smsProvider)
-        runBlocking { verify(callProvider).notify(any()) }
+        verify(callProvider).notify(any())
 
         assertThat(captor.firstValue.message).isEqualTo("Message")
         assertThat(captor.firstValue.recipients).contains("09121231234")

@@ -123,10 +123,7 @@ class NotificationDispatcher(@Autowired(required = false) private val notifiers:
      */
     private fun Notifier.handle(notification: Notification, notificationType: String, sample: Timer.Sample) {
         notify(notification)
-            .handle { ok, exception ->
-                if (exception != null) FailedNotification(exception = exception)
-                else ok
-            }
+            .exceptionally { FailedNotification(exception = it) }
             .thenAccept {
                 when (it) {
                     is SuccessfulNotification -> {
