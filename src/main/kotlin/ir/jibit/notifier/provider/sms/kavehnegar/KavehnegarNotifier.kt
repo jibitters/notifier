@@ -20,6 +20,8 @@ import java.net.http.HttpResponse
 import java.net.http.HttpResponse.BodyHandlers
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletableFuture.completedFuture
+import java.util.concurrent.ExecutorService
+import java.util.function.BiFunction
 
 /**
  * A Kavehnegar implementation of [Notifier] responsible for sending text messages and
@@ -28,6 +30,7 @@ import java.util.concurrent.CompletableFuture.completedFuture
  * @param properties Encapsulates the Kavehnegar related properties.
  * @param httpProperties Encapsulates the HTTP configurations.
  * @param httpClient The HTTP client used to send requests to Kavehnegar.
+ * @param ioExecutor Responsible for running all IO-bound tasks.
  *
  * @author Ali Dehghani
  */
@@ -36,7 +39,8 @@ import java.util.concurrent.CompletableFuture.completedFuture
 @ConditionalOnProperty(name = ["sms-providers.use"], havingValue = "kavehnegar")
 class KavehnegarNotifier(private val properties: KavehnegarProperties,
                          private val httpProperties: HttpProperties,
-                         private val httpClient: HttpClient) : Notifier {
+                         private val httpClient: HttpClient,
+                         private val ioExecutor: ExecutorService) : Notifier {
 
     /**
      * Can only handle SMS and call notifications.
@@ -66,7 +70,7 @@ class KavehnegarNotifier(private val properties: KavehnegarProperties,
         val uri = properties.getUri(notification as CallNotification)
         val request = HttpRequest.newBuilder(uri).timeout(httpProperties.timeout).POST(noBody()).build()
 
-        return httpClient.sendAsync(request, BodyHandlers.ofString()).handle { response, exception ->
+        return httpClient.sendAsync(request, BodyHandlers.ofString()).handleIo { response, exception ->
             if (exception != null) FailedNotification(exception = exception)
             else handleResponse(response)
         }
@@ -79,7 +83,7 @@ class KavehnegarNotifier(private val properties: KavehnegarProperties,
         val uri = properties.getUri(notification as SmsNotification)
         val request = HttpRequest.newBuilder(uri).timeout(httpProperties.timeout).POST(noBody()).build()
 
-        return httpClient.sendAsync(request, BodyHandlers.ofString()).handle { response, exception ->
+        return httpClient.sendAsync(request, BodyHandlers.ofString()).handleIo { response, exception ->
             if (exception != null) FailedNotification(exception = exception)
             else handleResponse(response)
         }
@@ -117,4 +121,7 @@ class KavehnegarNotifier(private val properties: KavehnegarProperties,
 
         return create("${baseUrl}v1/$token/call/maketts.json?receptor=${receptors}&message=${notification.message}")
     }
+
+    private fun <T, U> CompletableFuture<T>.handleIo(fn: (T, Throwable?) -> U): CompletableFuture<U> =
+        handleAsync(BiFunction { ok, failure -> fn(ok, failure) }, ioExecutor)
 }

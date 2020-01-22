@@ -13,6 +13,7 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletableFuture.completedFuture
 import java.util.concurrent.CompletableFuture.runAsync
 import java.util.concurrent.ExecutorService
+import java.util.function.BiFunction
 
 /**
  * Responsible for processing mail notification requests. This implementation will be registered
@@ -20,13 +21,13 @@ import java.util.concurrent.ExecutorService
  * bean, you should configure notifier with `spring.mail.*` configuration properties.
  *
  * @param mailSender Is responsible for sending emails.
- * @param ioDispatcher Would be used to submit mail request asynchronously.
+ * @param ioExecutor Would be used to submit mail request asynchronously.
  *
  * @author Ali Dehghani
  */
 @Component
 @ConditionalOnProperty(prefix = "spring.mail", name = ["host"])
-class MailNotifier(private val mailSender: JavaMailSender, val ioDispatcher: ExecutorService) : Notifier {
+class MailNotifier(private val mailSender: JavaMailSender, val ioExecutor: ExecutorService) : Notifier {
 
     /**
      * Can only handle [MailNotification] requests.
@@ -41,8 +42,8 @@ class MailNotifier(private val mailSender: JavaMailSender, val ioDispatcher: Exe
         val failed = notification.validate()
         if (failed != null) return completedFuture(failed)
 
-        return runAsync(Runnable { mailSender.send(notification.toMail()) }, ioDispatcher)
-            .handle { _, exception ->
+        return runAsync(Runnable { mailSender.send(notification.toMail()) }, ioExecutor)
+            .handleIo { _, exception ->
                 if (exception != null) FailedNotification(exception = exception)
                 else SuccessfulNotification()
             }
@@ -74,4 +75,7 @@ class MailNotifier(private val mailSender: JavaMailSender, val ioDispatcher: Exe
 
         return mail
     }
+
+    private fun <T, U> CompletableFuture<T>.handleIo(fn: (T, Throwable?) -> U): CompletableFuture<U> =
+        handleAsync(BiFunction { ok, failure -> fn(ok, failure) }, ioExecutor)
 }
