@@ -13,11 +13,13 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.stereotype.Service
 import java.net.URI
 import java.net.URI.create
+import java.net.URLEncoder
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpRequest.BodyPublishers.noBody
 import java.net.http.HttpResponse
 import java.net.http.HttpResponse.BodyHandlers
+import java.nio.charset.StandardCharsets
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletableFuture.completedFuture
 import java.util.concurrent.ExecutorService
@@ -106,8 +108,8 @@ class KavehnegarNotifier(private val properties: KavehnegarProperties,
      * the given [SmsNotification] details.
      */
     private fun KavehnegarProperties.getUri(notification: SmsNotification): URI {
-        val receptors = notification.recipients.joinToString()
-        val message = notification.message
+        val receptors = notification.recipients.joinToString().urlEncode()
+        val message = notification.message.urlEncode()
 
         return create("${baseUrl}v1/$token/sms/send.json?receptor=${receptors}&message=${message}&sender=${sender}")
     }
@@ -117,11 +119,14 @@ class KavehnegarNotifier(private val properties: KavehnegarProperties,
      * [CallNotification].
      */
     private fun KavehnegarProperties.getUri(notification: CallNotification): URI {
-        val receptors = notification.recipients.joinToString()
+        val receptors = notification.recipients.joinToString().urlEncode()
+        val message = notification.message.urlEncode()
 
-        return create("${baseUrl}v1/$token/call/maketts.json?receptor=${receptors}&message=${notification.message}")
+        return create("${baseUrl}v1/$token/call/maketts.json?receptor=${receptors}&message=$message")
     }
 
     private fun <T, U> CompletableFuture<T>.handleIo(fn: (T, Throwable?) -> U): CompletableFuture<U> =
         handleAsync(BiFunction { ok, failure -> fn(ok, failure) }, ioExecutor)
+
+    private fun String.urlEncode() = URLEncoder.encode(this, StandardCharsets.UTF_8)
 }
