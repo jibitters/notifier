@@ -153,7 +153,7 @@ the following set of configurations, we can configure the HTTP client.
 We're launching coroutines backed by a `ThreadPoolExecutor`-based `ExecutorService`. It's possible to configure the configurations
 related to this thread-pool as following:
  - (Optional) The `io-dispatcher.pool-size` system property, `IO_DISPATCHER_POOL_SIZE` environment variable or `--io-dispatcher.pool-size`
- command line option determines the thread pool sie. By default, it's twice the number of CPU cores.
+ command line option determines the thread pool size. By default, it's twice the number of CPU cores.
  - (Optional) The `io-dispatcher.thread-prefix` system property, the `IO_DISPATCHER_THREAD_PREFIX` env variable or `--io-dispatcher.thread-prefix`
  command line option determines the thread prefix for our IO thread pool. The default value is `notifier-io`.
 
