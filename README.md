@@ -53,7 +53,7 @@ Building the Application
 #### Dependencies
 The main components of the Notifier are as following:
  - JVM: Since the application has been developed using [Kotlin](https://kotlinlang.org), you will need a JVM instance to 
-   run the application (Java 8+).
+   run the application (Java 11+).
  - Nats: [Nats](https://nats.io) handles the messaging part. Each notification request should be published into a Nats 
    subject.
  - Protocol Buffer Compiler: All published messages should be serialized with [Protobuf](https://developers.google.com/protocol-buffers).
