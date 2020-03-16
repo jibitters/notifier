@@ -72,7 +72,7 @@ class MailNotifier(private val mailSender: JavaMailSender, val ioExecutor: Execu
     private fun MailNotification.toMail(): MimeMessage {
         val mail = mailSender.createMimeMessage()
         mail.subject = subject
-        mail.setContent(body, "text/html")
+        mail.setContent(body, "text/html; charset=utf-8")
         mail.setRecipients(TO, recipients.map { InternetAddress(it) }.toTypedArray())
         if (cc.isNotEmpty()) mail.setRecipients(CC, cc.map { InternetAddress(it) }.toTypedArray())
         if (bcc.isNotEmpty()) mail.setRecipients(BCC, bcc.map { InternetAddress(it) }.toTypedArray())
