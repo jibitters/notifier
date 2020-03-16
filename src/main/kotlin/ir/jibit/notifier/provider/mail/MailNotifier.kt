@@ -14,6 +14,11 @@ import java.util.concurrent.CompletableFuture.completedFuture
 import java.util.concurrent.CompletableFuture.runAsync
 import java.util.concurrent.ExecutorService
 import java.util.function.BiFunction
+import javax.mail.Message.RecipientType.BCC
+import javax.mail.Message.RecipientType.CC
+import javax.mail.Message.RecipientType.TO
+import javax.mail.internet.InternetAddress
+import javax.mail.internet.MimeMessage
 
 /**
  * Responsible for processing mail notification requests. This implementation will be registered
@@ -64,13 +69,13 @@ class MailNotifier(private val mailSender: JavaMailSender, val ioExecutor: Execu
     /**
      * Adapts the receiving [MailNotification] to an instance of [SimpleMailMessage].
      */
-    private fun MailNotification.toMail(): SimpleMailMessage {
-        val mail = SimpleMailMessage()
-        mail.setSubject(subject)
-        mail.setText(body)
-        mail.setTo(*recipients.toTypedArray())
-        if (cc.isNotEmpty()) mail.setCc(*cc.toTypedArray())
-        if (bcc.isNotEmpty()) mail.setBcc(*bcc.toTypedArray())
+    private fun MailNotification.toMail(): MimeMessage {
+        val mail = mailSender.createMimeMessage()
+        mail.subject = subject
+        mail.setContent(body, "text/html; charset=utf-8")
+        mail.setRecipients(TO, recipients.map { InternetAddress(it) }.toTypedArray())
+        if (cc.isNotEmpty()) mail.setRecipients(CC, cc.map { InternetAddress(it) }.toTypedArray())
+        if (bcc.isNotEmpty()) mail.setRecipients(BCC, bcc.map { InternetAddress(it) }.toTypedArray())
         if (sender != null) mail.setFrom(sender)
 
         return mail
